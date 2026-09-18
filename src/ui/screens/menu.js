@@ -56,7 +56,8 @@ export function build(app) {
     item('Sandbox', 'B', () => app.router.push('sandbox')),
     item('Encyclopedia', 'E', () => app.router.push('codex')),
     item('Statistics', 'S', () => app.router.push('stats')),
-    item('Settings', ',', () => app.router.push('settings'))
+    item('Settings', ',', () => app.router.push('settings')),
+    item('Credits', 'C', () => app.router.push('credits'))
   ]));
 
   const prog = progress(app.profile);
@@ -64,8 +65,11 @@ export function build(app) {
     h('span', { text: `${prog.got} / ${prog.total} achievements` }),
     h('span', { text: `${num(app.profile.totals.hands)} hands played` }),
     h('span', { text: `best round ${app.profile.best.round || 0}` }),
-    h('a', { href: 'https://doi.org/10.1140/epjp/s13360-020-00360-5', target: '_blank', rel: 'noopener',
-      text: 'after Fuchs, Falch & Johnsen (SINTEF)' })
+    h('button.btn.btn-sm.btn-ghost', {
+      text: 'after Fuchs, Falch & Johnsen (SINTEF)',
+      style: { padding: '0', border: '0', background: 'none', color: 'var(--ink-faint)', fontSize: 'inherit' },
+      onclick: () => app.router.push('credits')
+    })
   ]));
 
   return root;
@@ -96,6 +100,7 @@ export function key(e, app) {
     b: () => app.router.push('sandbox'),
     e: () => app.router.push('codex'),
     s: () => app.router.push('stats'),
+    c: () => app.router.push('credits'),
     ',': () => app.router.push('settings')
   };
   if (map[k]) { SFX.click(); map[k](); return true; }

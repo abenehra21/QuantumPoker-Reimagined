@@ -172,6 +172,11 @@ solve every lesson by exhaustive search, so a lesson can never ship unsolvable.
 
 ![Lesson one](docs/tutorial.jpg)
 
+A **dealer** narrates every phase under the table in the plainest words available — what
+this street is *for*, not what just happened — and names the concept the moment you first
+cause it. Play Twist then Spin and it tells you that was interference, because you have just
+watched interference rather than read about it.
+
 The **encyclopedia** is fourteen illustrated entries with a runnable demo on each — press Run
 and watch the state move on a Bloch sphere.
 
@@ -204,6 +209,9 @@ Everything is stored in your own browser and nowhere else; there is no account a
 | `P` | Show every coin's ket and probability |
 | `M` | Mute |
 | `Esc` | Cancel, close, or go back |
+
+From the menu: `P` play, `D` daily, `T` tutorial, `B` sandbox, `E` encyclopedia, `S` stats,
+`C` credits, `,` settings.
 
 Everything is reachable by keyboard and every control is labelled for a screen reader.
 
@@ -305,5 +313,7 @@ This is a ground-up reimplementation on top of their rules: the simulator, the f
 the run structure, the opponents, the tutorial, the encyclopedia and every pixel of the
 interface are new work. It is a spiritual successor, not a fork, and shares no history with
 any earlier repository.
+
+![Credits](docs/credits.jpg)
 
 Licensed under the **GNU GPL v3**, like the original.

@@ -23,7 +23,7 @@ import { MODES } from '../../gameplay/modes.js';
 import { CARDS, legal, RARITY, simulateCard } from '../../gameplay/cards.js';
 import { SKILL } from '../../gameplay/planner.js';
 import { step as botStep, strength } from '../../ai/brain.js';
-import { speak } from '../../ai/dialogue.js';
+import { speak, DEALER } from '../../ai/dialogue.js';
 import { findLinks, findCorrelations, readCoin, entropy, scoreDistribution } from '../../quantum/read.js';
 import { openResults } from './results.js';
 import { openInspector } from './inspector.js';
@@ -74,6 +74,7 @@ class TableUI {
 
   build() {
     this.messageEl = h('div.message-bar');
+    this.dealerEl2 = h('div.dealer-line');
     this.potEl = h('div.pot', [h('span', { text: '0' })]);
     this.streetEl = h('div.street-name', { text: 'Deal' });
     this.dotsEl = h('div.street-dots', [0, 1, 2, 3].map(() => h('i')));
@@ -116,6 +117,7 @@ class TableUI {
       ]),
       this.feltEl,
       h('div', [
+        this.dealerEl2,
         this.messageEl,
         h('div.table-bottom', [this.handEl, this.actionsEl])
       ])
@@ -156,6 +158,21 @@ class TableUI {
     if (this.run && !this.run.over && this.run.round > 0) saveRun(this.run.snapshot());
     this.app.accent();
     this.app.router.go('menu');
+  }
+
+  /**
+   * The dealer. Not a personality, a narrator: it says what this part of the
+   * hand is *for*, in the plainest words available. It is the single most
+   * useful teaching device in the game, because it arrives at the moment the
+   * player needs it and never asks to be read.
+   */
+  deal_say(text) {
+    if (!text || text === this.lastDealerLine) return;
+    this.lastDealerLine = text;
+    clear(this.dealerEl2);
+    this.dealerEl2.appendChild(h('span.dealer-who', { text: 'Dealer' }));
+    this.dealerEl2.appendChild(h('span', { text }));
+    pulse(this.dealerEl2, 'live', 700);
   }
 
   /* ================= rendering ================= */
@@ -643,6 +660,7 @@ class TableUI {
       case 'handStart':
         this.dealtHand = -1;
         this.renderHand();
+        this.deal_say(DEALER.street(0, 0));
         music.set('table');
         await wait(220);
         break;
@@ -650,6 +668,7 @@ class TableUI {
       case 'street': {
         SFX.street(ev.round);
         this.streetEl.textContent = this.game.street();
+        this.deal_say(DEALER.street(ev.round, ev.revealed));
         for (let q = 0; q < ev.revealed; q++) {
           const el = this.orbs[q];
           if (!el.classList.contains('unrevealed')) continue;
@@ -695,6 +714,7 @@ class TableUI {
       case 'gatePhase':
         music.set('cards');
         this.streetEl.textContent = 'Card phase';
+        this.deal_say(DEALER.gatePhase);
         V.shout('CARD PHASE', 'violet');
         for (let q = 0; q < this.orbs.length; q++) {
           this.orbs[q].classList.remove('unrevealed');
@@ -725,7 +745,10 @@ class TableUI {
           V.shake(5); V.chroma(1.6);
           this.game.hero().noiseLog.push(n);
         }
-        if (ev.events.some((n) => n.seat === this.game.hero().seat)) await wait(320);
+        if (ev.events.some((n) => n.seat === this.game.hero().seat)) {
+          this.deal_say(DEALER.explain.noise);
+          await wait(320);
+        }
         break;
 
       case 'chaos':
@@ -786,6 +809,9 @@ class TableUI {
   async animatePlay(ev) {
     const P = this.app.particles, V = this.app.vfx;
     const card = CARDS[ev.card];
+    const hero = this.game.hero();
+    const last = hero.plays[hero.plays.length - 1];
+    const before = last && last.card === ev.card ? last.before : null;
     const rarity = RARITY[card.rarity];
     const colour = hexToRgb(rarity.tint);
 
@@ -823,9 +849,33 @@ class TableUI {
     this.renderHand();
 
     if (ev.note) toast({ icon: card.symbol, body: ev.note, tone: rarity.tint });
+
+    // The dealer explains the concept the moment the player first causes it.
+    const taught = this.conceptFor(ev.card, before, this.game.hero().board);
+    if (taught) this.deal_say(DEALER.explain[taught]);
     if (ev.fx) this.bigEffect(ev.fx);
 
     await wait(card.rarity === 'legendary' ? 700 : 340);
+  }
+
+  /**
+   * Which idea did that card just demonstrate? Decided from what actually
+   * changed on the board, not from the card's name, so Link only teaches
+   * entanglement on the plays that genuinely entangle something.
+   */
+  conceptFor(id, before, after) {
+    if (!before || !after) return null;
+    const was = findLinks(before).length, now = findLinks(after).length;
+    if (now > was) return 'entangle';
+    if (id === 'M' || id === 'MEASUREX' || id === 'ZENO' || id === 'RESET') return 'collapse';
+    for (let q = 0; q < after.n; q++) {
+      const a = before.probOne(q), b = after.probOne(q);
+      // A coin that was an even toss and is now certain got there by
+      // interference; nothing else can do that in one card.
+      if (Math.abs(a - 0.5) < 1e-6 && (b > 1 - 1e-6 || b < 1e-6)) return 'interference';
+      if ((a > 1 - 1e-6 || a < 1e-6) && Math.abs(b - 0.5) < 1e-6) return 'superposition';
+    }
+    return null;
   }
 
   bigEffect(kind) {
@@ -865,6 +915,7 @@ class TableUI {
 
   async showdown(results) {
     const P = this.app.particles, V = this.app.vfx;
+    this.deal_say(DEALER.showdown);
     const hero = this.game.hero();
     const won = hero.won > 0;
 

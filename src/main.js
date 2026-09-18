@@ -20,6 +20,7 @@ import * as sandbox from './ui/screens/sandbox.js';
 import * as codex from './ui/screens/codex.js';
 import * as stats from './ui/screens/stats.js';
 import * as settings from './ui/screens/settings.js';
+import * as credits from './ui/screens/credits.js';
 
 const app = new App({
   bg: $('#bg-canvas'),
@@ -38,7 +39,8 @@ app.router
   .register('sandbox', sandbox)
   .register('codex', codex)
   .register('stats', stats)
-  .register('settings', settings);
+  .register('settings', settings)
+  .register('credits', credits);
 
 /* ---- global keys ---------------------------------------------------- */
 

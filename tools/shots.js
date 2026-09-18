@@ -88,6 +88,8 @@ const SHOTS = [
       await new Promise(r=>setTimeout(r,1400));` },
   { name: 'tutorial', url: '/index.html', wait: 1400,
     script: `QP.router.go('tutorial'); await new Promise(r=>setTimeout(r,1600));` },
+  { name: 'credits', url: '/index.html', wait: 1400,
+    script: `QP.router.go('credits'); await new Promise(r=>setTimeout(r,1200));` },
   { name: 'stats', url: '/index.html', wait: 1400,
     script: `
       const p = QP.profile;
