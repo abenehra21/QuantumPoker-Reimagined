@@ -100,5 +100,21 @@ for (const m of html.matchAll(/(?:href|src)="((?!http|data:|#)[^"]+)"/g)) {
 }
 console.log(`  ${failures - htmlBefore} missing files`);
 
+/* ---- 5. README references ---- */
+console.log('docs');
+{
+  const before = failures;
+  const md = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  let images = 0;
+  for (const m of md.matchAll(/!\[[^\]]*\]\(((?!http)[^)]+)\)/g)) {
+    images++;
+    try { statSync(join(ROOT, m[1])); } catch (e) { fail(`README references missing image ${m[1]}`); }
+  }
+  for (const m of md.matchAll(/\]\((?!http|#|mailto)([^)]+\.(?:js|py|css|md|txt|html))\)/g)) {
+    try { statSync(join(ROOT, m[1])); } catch (e) { fail(`README links missing file ${m[1]}`); }
+  }
+  console.log(`  ${images} screenshots referenced, ${failures - before} missing`);
+}
+
 console.log(failures ? `\n${failures} problems.` : '\nAll static checks passed.');
 process.exit(failures ? 1 : 0);

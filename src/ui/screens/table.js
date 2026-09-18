@@ -39,6 +39,10 @@ let ui = null;
 
 export function build(app, opts) {
   ui = new TableUI(app, opts);
+  // Exposed so the screenshot tool and the developer overlay can drive the
+  // table the way a player does, rather than poking the engine underneath
+  // it and leaving the view showing a hand that already finished.
+  app.table = ui;
   return ui.root;
 }
 
@@ -48,6 +52,7 @@ export function enter(app, opts) {
 
 export function leave(app) {
   if (ui) ui.teardown();
+  if (app.table === ui) app.table = null;
 }
 
 export function key(e, app) {
