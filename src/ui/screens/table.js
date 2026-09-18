@@ -21,7 +21,7 @@ import { loop } from '../../engine/loop.js';
 
 import { Run } from '../../gameplay/run.js';
 import { MODES, targetFor } from '../../gameplay/modes.js';
-import { CARDS, legal, RARITY } from '../../gameplay/cards.js';
+import { CARDS, legal, RARITY, simulateCard } from '../../gameplay/cards.js';
 import { SKILL } from '../../gameplay/planner.js';
 import { step as botStep, decide as botDecide, strength } from '../../ai/brain.js';
 import { speak } from '../../ai/dialogue.js';
@@ -246,9 +246,15 @@ class TableUI {
   }
 
   renderLinks() {
-    if (this.game.revealed < 1) { clear(this.linkSvg); return; }
+    // Only ever draw an arc between two coins the player can already see.
+    // A link to a face-down coin would leak the board a street early, and
+    // the engine's `revealed` count runs ahead of the flip animation.
+    const shown = this.orbs.reduce((n, el, i) => el.classList.contains('unrevealed') ? n : i + 1, 0);
+    if (shown < 2) { clear(this.linkSvg); return; }
+    const visible = (l) => l.a < shown && l.b < shown;
     const st = this.viewBoard();
-    drawLinks(this.linkSvg, this.orbs, findLinks(st), findCorrelations(st, 0.1));
+    drawLinks(this.linkSvg, this.orbs,
+      findLinks(st).filter(visible), findCorrelations(st, 0.1).filter(visible));
   }
 
   renderHand() {
@@ -513,10 +519,8 @@ class TableUI {
     const before = hero.board;
     const after = before.clone();
     let text;
-    try {
-      const { simulateCard } = this._sim || (this._sim = {});
-      text = this.describeEffect(before, after, this.selected.id, targets);
-    } catch (e) { return; }
+    try { text = this.describeEffect(before, after, this.selected.id, targets); }
+    catch (e) { return; }
     if (!text) return;
 
     this.previewOff();
@@ -528,11 +532,13 @@ class TableUI {
     this.feltEl.appendChild(this.previewEl);
   }
 
+  /**
+   * What this card would do, before you commit to it. Runs the card on a
+   * copy of the board using the planner's side-effect-free path, and reports
+   * the difference in plain numbers.
+   */
   describeEffect(before, after, id, targets) {
-    // Import lazily: the planner's lean path is exactly what a preview wants.
-    const mod = this._simMod;
-    if (!mod) return null;
-    mod.simulateCard(after, id, targets, () => 0.5);
+    simulateCard(after, id, targets, () => 0.5);
     const d = [];
     for (let q = 0; q < before.n; q++) {
       const a = before.probOne(q), b = after.probOne(q);
@@ -1000,7 +1006,3 @@ function hexToRgb(hex) {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [110, 231, 255];
 }
-
-// The preview wants the planner's lean card path; load it once, lazily, so
-// the table's first paint does not wait on it.
-import('../../gameplay/cards.js').then((m) => { if (ui) ui._simMod = m; });

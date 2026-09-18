@@ -1,0 +1,5 @@
+# Only for tools/verify_with_qiskit.py, which cross-checks the browser
+# game's own state-vector simulator against Qiskit. The game itself has
+# no dependencies at all and needs none of this to run.
+qiskit>=1.0
+numpy>=1.24

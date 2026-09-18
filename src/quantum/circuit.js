@@ -30,9 +30,19 @@ export const OPS = {
   cphase: { label: 'CP', arity: 2, control: 2, param: true, apply: (s, t, a) => s.cphase(t[0], t[1], a) },
   swap:   { label: '×', arity: 2, cross: true, apply: (s, t) => s.swap(t[0], t[1]) },
   ccx:    { label: 'CCX', arity: 3, control: 2, target: 'plus', apply: (s, t) => s.ccx(t[0], t[1], t[2]) },
+  /** Multi-controlled Z: a dot on every wire it touches, joined by a line. */
+  mcz:    { label: 'Z', arity: 0, allDots: true, apply: (s, t) => s.mcz(t) },
   measure:{ label: 'M', arity: 1, meter: true, apply: null },
   barrier:{ label: '', arity: 0, barrier: true, apply: null },
-  noise:  { label: '✳', arity: 1, noiseMark: true, apply: null }
+  noise:  { label: '✳', arity: 1, noiseMark: true, apply: null },
+  /**
+   * A state the circuit jumps to rather than computes. Exactly one card
+   * (Coherence) is genuinely not a unitary - it trades entanglement for
+   * cleaner single-coin odds - so it records where it landed instead of
+   * pretending to be a sequence of gates. Replay stays exact, and the
+   * diagram says plainly that something non-unitary happened here.
+   */
+  snapshot: { label: '◈', arity: 0, snapshot: true, apply: null }
 };
 
 export class Circuit {
@@ -112,6 +122,7 @@ export class Circuit {
         if (o.bit === 0 || o.bit === 1) st.project(o.targets[0], o.bit);
         continue;
       }
+      if (o.op === 'snapshot') { if (o.state) st.copyFrom(o.state); continue; }
       if (!spec || !spec.apply) continue;
       spec.apply(st, o.targets, o.param);
     }
@@ -131,6 +142,7 @@ export class Circuit {
     for (const o of this.ops) {
       const spec = OPS[o.op];
       if (o.op === 'measure') { if (o.bit === 0 || o.bit === 1) st.project(o.targets[0], o.bit); }
+      else if (o.op === 'snapshot') { if (o.state) st.copyFrom(o.state); }
       else if (spec && spec.apply) spec.apply(st, o.targets, o.param);
       push();
     }
@@ -159,6 +171,8 @@ export class Circuit {
     for (const o of this.ops) {
       if (o.op === 'barrier') { lines.push('barrier q;'); continue; }
       if (o.op === 'noise') { lines.push(`// noise: ${o.note || ''}`); continue; }
+      if (o.op === 'snapshot') { lines.push('// non-unitary: entanglement traded for local purity'); continue; }
+      if (o.op === 'mcz') { lines.push(`ctrl(${o.targets.length - 1}) @ z ${o.targets.map((t) => `q[${t}]`).join(', ')};`); continue; }
       if (o.op === 'measure') { lines.push(`c[${o.targets[0]}] = measure q[${o.targets[0]}];`); continue; }
       lines.push(qasmLine(o.op, o.targets, o.param));
     }

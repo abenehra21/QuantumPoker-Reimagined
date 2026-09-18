@@ -236,6 +236,20 @@ export class QState {
     return this;
   }
 
+  /**
+   * Multi-controlled Z: flips the sign of the one branch where every listed
+   * qubit is 1. Drawn as a filled dot on each wire joined by a line, which
+   * is exactly how a circuit diagram writes it.
+   */
+  mcz(qubits) {
+    let mask = 0;
+    for (const q of qubits) mask |= 1 << q;
+    for (let i = 0; i < this.size; i++) {
+      if ((i & mask) === mask) { this.re[i] = -this.re[i]; this.im[i] = -this.im[i]; }
+    }
+    return this;
+  }
+
   /** iSWAP-free Bell maker: H on a, then CX a->b. Used by the deal and Bell Pair. */
   bell(a, b) { return this.h(a).cx(a, b); }
 

@@ -148,7 +148,23 @@ export class CircuitView {
         ctx.globalAlpha = 1;
       }
 
-      if (spec.cross) {
+      if (spec.snapshot) {
+        ctx.strokeStyle = '#c084fc';
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, top + usable); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#c084fc';
+        ctx.font = '700 12px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('\u25C8', px, top - 8);
+        ctx.restore();
+        return;
+      }
+
+      if (spec.allDots) {
+        ctx.fillStyle = colour;
+        for (const q of o.targets) { ctx.beginPath(); ctx.arc(px, y(q), 4.5, 0, 6.2832); ctx.fill(); }
+      } else if (spec.cross) {
         for (const q of o.targets) {
           ctx.strokeStyle = colour; ctx.lineWidth = 2;
           const s = 5;

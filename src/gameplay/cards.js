@@ -112,7 +112,10 @@ export const CARDS = {
     blurb: 'Forces a coin down to 0, whatever it was doing. Breaks any link through it.',
     physics: 'Reset: measure, then flip if the answer was 1. Real hardware does exactly this between shots.',
     hint: 'Looks like a wasted point, but a grounded coin is a clean slate for Spin or Flip.',
-    ops: (t) => [{ op: 'measure', targets: t, reset: true }]
+    // The coin itself always lands on 0, but grounding it measures it, and
+    // that collapses anything it was linked to. The planner has to branch.
+    random: true,
+    ops: (t) => [{ op: 'reset', targets: t }]
   },
 
   /* ================= RARE ================= */
@@ -168,8 +171,13 @@ export const CARDS = {
     blurb: 'Forces two coins into a perfect link. They will always land the same way.',
     physics: 'Hadamard then CNOT: the standard recipe for the Bell state (|00⟩+|11⟩)/√2.',
     hint: 'Two linked coins are worth 0 or 2, never 1. Play it when you need a swing, not a sure thing.',
-    ops: (t) => [{ op: 'h', targets: [t[0]] }, { op: 'cx', targets: t }],
-    prepare: (st, t) => { st.project(t[0], 0); st.project(t[1], 0); }
+    random: true,                                   // resetting the pair measures it
+    ops: (t) => [
+      { op: 'reset', targets: [t[0]] },
+      { op: 'reset', targets: [t[1]] },
+      { op: 'h', targets: [t[0]] },
+      { op: 'cx', targets: t }
+    ]
   },
 
   FREEZE: {
@@ -316,11 +324,12 @@ export const CARDS = {
     physics: 'A GHZ state. The most fragile object in quantum mechanics: one measurement anywhere destroys it.',
     hint: 'A coin flip for the whole hand. Five points or none.',
     ops: (t, ctx) => {
-      const out = [{ op: 'h', targets: [t[0]] }];
+      const out = [];
+      for (let q = 0; q < ctx.state.n; q++) out.push({ op: 'reset', targets: [q] });
+      out.push({ op: 'h', targets: [t[0]] });
       for (let q = 0; q < ctx.state.n; q++) if (q !== t[0]) out.push({ op: 'cx', targets: [t[0], q] });
       return out;
-    },
-    prepare: (st) => { for (let q = 0; q < st.n; q++) st.project(q, 0); }
+    }
   },
 
   PHASESTORM: {
@@ -380,12 +389,28 @@ export const CARDS = {
     blurb: 'Searches every possible ending of your board and tilts all of them toward the best one.',
     physics: 'Grover’s algorithm: amplitude amplification over the whole 2ⁿ space, marking the all-ones state.',
     hint: 'The strongest card in the game and it still cannot promise you anything. That is the lesson.',
-    ops: () => [],
-    effect: (ctx) => {
-      groverStep(ctx.state);
-      ctx.circuit.add('barrier', []);
-      return { note: 'Grover amplified the all-ones branch.', fx: 'grover' };
-    }
+    /**
+     * The real thing, written out: mark the all-ones branch with a
+     * multi-controlled Z, then reflect about the mean as H, X, MCZ, X, H.
+     *
+     * Doing it as a genuine circuit rather than as a direct edit of the
+     * amplitudes matters. The Circuit View and the QASM export both read
+     * from these instructions, so an effect that edits the state behind
+     * their back would draw a diagram that does not reproduce the board.
+     * tools/verify_with_qiskit.py is what caught that, and now guards it.
+     */
+    ops: (t, ctx) => {
+      const qs = [];
+      for (let q = 0; q < ctx.state.n; q++) qs.push(q);
+      const all = (op) => qs.map((q) => ({ op, targets: [q] }));
+      return [
+        { op: 'mcz', targets: qs },
+        ...all('h'), ...all('x'),
+        { op: 'mcz', targets: qs },
+        ...all('x'), ...all('h')
+      ];
+    },
+    effect: () => ({ note: 'Grover amplified the all-ones branch.', fx: 'grover' })
   },
 
   TELEPORT: {
@@ -394,6 +419,7 @@ export const CARDS = {
     blurb: 'Moves one coin’s exact state onto another and leaves the first grounded.',
     physics: 'Quantum teleportation: Bell measurement plus two classical bits. Nothing travels faster than light.',
     hint: 'Copy your best coin onto coin 1 and win every tie for the rest of the hand.',
+    random: true,                                   // the Bell measurement is a real one
     ops: (t) => [
       { op: 'barrier', targets: [] },
       { op: 'cx', targets: t },
@@ -523,28 +549,15 @@ export const CARDS = {
         if (p > 1e-9) fresh.ry(q, 2 * Math.asin(Math.sqrt(p)));
       }
       st.copyFrom(fresh);
-      ctx.circuit.add('barrier', []);
+      // Not a unitary, and the circuit should not pretend otherwise: record
+      // where it landed so replay and the diagram both stay honest.
+      ctx.circuit.add('snapshot', [], null, { state: st.clone(), note: 'entanglement traded for local purity' });
       return { note: 'Every link dissolved; the odds survived.', fx: 'cohere' };
     }
   }
 };
 
 export const CARD_IDS = Object.keys(CARDS);
-
-/** One step of Grover diffusion, marking the all-ones outcome. */
-function groverStep(st) {
-  const last = st.size - 1;
-  st.re[last] = -st.re[last];
-  st.im[last] = -st.im[last];
-  let mr = 0, mi = 0;
-  for (let i = 0; i < st.size; i++) { mr += st.re[i]; mi += st.im[i]; }
-  mr /= st.size; mi /= st.size;
-  for (let i = 0; i < st.size; i++) {
-    st.re[i] = 2 * mr - st.re[i];
-    st.im[i] = 2 * mi - st.im[i];
-  }
-  st.renormalise();
-}
 
 /* ------------------------------------------------------------------ *
  * Playing a card
@@ -563,22 +576,28 @@ export function playCard(id, targets, ctx) {
   const st = ctx.state;
   const c = Object.assign({}, ctx, { targets, card });
   const before = st.clone();
-
-  if (card.prepare) card.prepare(st, targets, c);
-
   const outcomes = [];
   const instructions = card.ops(targets, c) || [];
   for (const ins of instructions) {
-    if (ins.op === 'measure') {
-      const bit = st.collapse(ins.targets[0], ctx.rng);
-      if (ins.reset && bit === 1) { st.x(ins.targets[0]); }
-      if (ins.teleport) {
-        // The classical correction half of teleportation.
-        if (bit === 1) st.z(targets[1]);
+    if (ins.op === 'measure' || ins.op === 'reset') {
+      const q = ins.targets[0];
+      const bit = st.collapse(q, ctx.rng);
+      ctx.circuit.add('measure', [q], null, { bit, card: id });
+
+      // Corrections conditioned on the outcome have to be *recorded*, not
+      // just applied. Replaying the circuit is how the Circuit View, the
+      // QASM export and the after-action rewind reconstruct the board, so a
+      // silent correction leaves all three showing a board that never existed.
+      if (ins.op === 'reset') {
+        if (bit === 1) { st.x(q); ctx.circuit.add('x', [q], null, { card: id, conditional: true }); }
+        outcomes.push({ coin: q, bit, reset: true });
+        continue;
       }
-      ctx.circuit.add('measure', ins.targets, null, { bit, card: id });
-      if (ins.reset) ctx.circuit.add('x', ins.targets, null, { card: id, conditional: true });
-      outcomes.push({ coin: ins.targets[0], bit });
+      if (ins.teleport && bit === 1) {
+        st.z(targets[1]);
+        ctx.circuit.add('z', [targets[1]], null, { card: id, conditional: true });
+      }
+      outcomes.push({ coin: q, bit });
       continue;
     }
     if (ins.op === 'barrier') { ctx.circuit.add('barrier', []); continue; }
@@ -608,12 +627,11 @@ export function simulateCard(st, id, targets, rng) {
   const card = CARDS[id];
   if (!card) return;
   const ctx = { state: st, targets, rng, circuit: NULL_CIRCUIT, player: NULL_PLAYER, planning: true };
-  if (card.prepare) card.prepare(st, targets, ctx);
   const instructions = card.ops(targets, ctx) || [];
   for (const ins of instructions) {
-    if (ins.op === 'measure') {
+    if (ins.op === 'measure' || ins.op === 'reset') {
       const bit = st.collapse(ins.targets[0], rng);
-      if (ins.reset && bit === 1) st.x(ins.targets[0]);
+      if (ins.op === 'reset' && bit === 1) st.x(ins.targets[0]);
       if (ins.teleport && bit === 1) st.z(targets[1]);
       continue;
     }
@@ -647,6 +665,7 @@ function applyInstruction(st, ins) {
     case 'cphase': return st.cphase(t[0], t[1], ins.param);
     case 'swap': return st.swap(t[0], t[1]);
     case 'ccx': return st.ccx(t[0], t[1], t[2]);
+    case 'mcz': return st.mcz(t);
     default: throw new Error('cannot apply ' + ins.op);
   }
 }

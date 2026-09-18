@@ -350,6 +350,28 @@ section('cards');
   ok('Coherence keeps every probability', coh.p.every((v, i) => Math.abs(v - coh.q[i]) < 1e-9), JSON.stringify(coh));
   ok('Coherence dissolves every link', coh.links === 0);
 
+  // The circuit a card writes must reproduce the board it produced. The
+  // Circuit View, the QASM export and the after-action rewind all replay
+  // from these instructions, so a card that edits the state behind the
+  // circuit's back draws a diagram that is quietly a lie.
+  ok('every card\u2019s recorded circuit reproduces its own result', (() => {
+    const bad = [];
+    for (const id of CARD_IDS) {
+      for (let i = 0; i < 4; i++) {
+        const start = dealBoard(rng, 5);
+        const st = start.clone();
+        const cir = new Circuit(5, start);
+        const t = [0, 1, 2].slice(0, CARDS[id].arity);
+        if (!legal(id, t, st).ok) continue;
+        try {
+          playCard(id, t, { state: st, circuit: cir, rng, player: { noiseLog: [], rewindLast: () => null }, game: null });
+        } catch (e) { bad.push(id + ':' + e.message); continue; }
+        if (!cir.stateAt().same(st)) bad.push(id);
+      }
+    }
+    return bad.length === 0 ? true : Array.from(new Set(bad)).join(',');
+  })() === true, 'cards whose circuit does not reproduce their board');
+
   // Idle draws instead of acting.
   ok('Idle is a cantrip', CARDS.I.cantrip && CARDS.I.arity === 0);
 }
