@@ -1,0 +1,215 @@
+/*
+ * base.css — reset, page frame, and the things that must be right before
+ * anything else looks right: focus rings, scrollbars, selection, and the
+ * screen-level effect layers.
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+body {
+  /* A quiet radial wash so the page is never flat black. */
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(80,120,220,.14), transparent 60%),
+    radial-gradient(90% 70% at 10% 110%, rgba(167,139,250,.10), transparent 60%),
+    var(--bg);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: .01em;
+  margin: 0;
+  line-height: 1.15;
+}
+
+p { margin: 0 0 var(--s3); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* --- focus: always visible, never ugly -------------------------------- */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+/* --- scrollbars -------------------------------------------------------- */
+* { scrollbar-width: thin; scrollbar-color: var(--mist) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--mist); border-radius: var(--r-pill);
+  border: 3px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--steel); background-clip: content-box; }
+
+/* --- the frame --------------------------------------------------------- */
+#app {
+  position: fixed; inset: 0;
+  display: grid;
+  isolation: isolate;
+  /* A single mis-sized child must never be able to scroll the whole game
+     sideways; the screens that legitimately scroll do it internally. */
+  overflow: hidden;
+  max-width: 100vw;
+}
+
+#bg-canvas, #fx-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+#bg-canvas { z-index: 0; }
+#fx-canvas { z-index: 40; }
+
+#screens {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.screen, .screen > .screen-inner { min-width: 0; }
+
+.screen {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-slow) var(--ease);
+}
+.screen.active { opacity: 1; pointer-events: auto; }
+.screen.leaving { opacity: 0; }
+
+/* Screens slide a little as they arrive; the direction says where you went. */
+.screen > .screen-inner {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  transform: translateY(14px) scale(.995);
+  opacity: 0;
+  transition: transform var(--t-slow) var(--ease-out), opacity var(--t-slow) var(--ease);
+}
+.screen.active > .screen-inner { transform: none; opacity: 1; }
+
+/* --- screen effects ---------------------------------------------------- */
+#vfx-root { position: fixed; inset: 0; z-index: 45; pointer-events: none; }
+
+.vfx-flash {
+  position: absolute; inset: 0;
+  opacity: 0; pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.vfx-ripple {
+  position: absolute;
+  width: var(--ripple-size, 300px); height: var(--ripple-size, 300px);
+  margin-left: calc(var(--ripple-size, 300px) / -2);
+  margin-top: calc(var(--ripple-size, 300px) / -2);
+  border-radius: 50%;
+  border: 2px solid var(--ripple-color, var(--accent));
+  opacity: .8;
+  transform: scale(.05);
+  animation: ripple-out 900ms var(--ease-out) forwards;
+}
+@keyframes ripple-out {
+  to { transform: scale(1); opacity: 0; border-width: 0.5px; }
+}
+
+.vfx-shout {
+  position: absolute; left: 50%; top: 38%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 70%, transparent);
+  animation: shout 1600ms var(--ease-out) forwards;
+  white-space: nowrap;
+}
+.vfx-shout.tone-gold { color: var(--legendary); text-shadow: 0 0 44px color-mix(in srgb, var(--legendary) 70%, transparent); }
+.vfx-shout.tone-rose { color: var(--rose); text-shadow: 0 0 44px color-mix(in srgb, var(--rose) 70%, transparent); }
+.vfx-shout.tone-violet { color: var(--violet); text-shadow: 0 0 44px color-mix(in srgb, var(--violet) 70%, transparent); }
+@keyframes shout {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.7); filter: blur(10px); }
+  18%  { opacity: 1; transform: translate(-50%,-50%) scale(1.04); filter: blur(0); }
+  72%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-56%) scale(1.02); filter: blur(4px); }
+}
+
+/* Chromatic aberration: two tinted copies of the UI, offset by --chroma.
+   Off by default and gone entirely when the amount is zero. */
+.chroma-on #screens { position: relative; }
+.chroma-on #screens::before,
+.chroma-on #screens::after {
+  content: ''; position: absolute; inset: 0;
+  pointer-events: none; z-index: 60;
+  mix-blend-mode: screen; opacity: .35;
+}
+.chroma-on #screens::before {
+  background: rgba(255,0,60,.10);
+  transform: translateX(calc(var(--chroma) * -1));
+}
+.chroma-on #screens::after {
+  background: rgba(0,180,255,.10);
+  transform: translateX(var(--chroma));
+}
+
+/* Bloom is expensive; this is the switch. */
+.no-bloom *, .no-bloom *::before, .no-bloom *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+/* --- utilities --------------------------------------------------------- */
+.row { display: flex; align-items: center; gap: var(--s3); }
+.col { display: flex; flex-direction: column; gap: var(--s3); }
+.grow { flex: 1; }
+.center { display: flex; align-items: center; justify-content: center; }
+.wrap { flex-wrap: wrap; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.dim { color: var(--ink-mute); }
+.soft { color: var(--ink-soft); }
+.tiny { font-size: var(--fs-xs); }
+.small { font-size: var(--fs-sm); }
+.caps { text-transform: uppercase; letter-spacing: .14em; font-size: var(--fs-xs); }
+.nowrap { white-space: nowrap; }
+.scroll { overflow-y: auto; overscroll-behavior: contain; }
+.hidden { display: none !important; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* A skip link, because the table is a lot of tab stops. */
+.skip-link {
+  position: absolute; left: -999px; top: var(--s3); z-index: 200;
+  background: var(--surface-solid); padding: var(--s2) var(--s4);
+  border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+}
+.skip-link:focus { left: var(--s3); }

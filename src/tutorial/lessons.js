@@ -18,7 +18,7 @@ export const LESSONS = [
     id: 'coins',
     title: 'Five coins',
     concept: 'Qubits',
-    text: 'Five coins sit in the middle of the table. At the end of the hand every one of them lands on a 1 or a 0, and every 1 is a point. Two of these are already decided. Three are not.',
+    text: 'Five coins sit in the middle of the table. At the end of the hand every one of them lands on a 1 or a 0, and every 1 is a point. Three of these are already decided. Two are not.',
     aside: 'A coin is a qubit. "Not decided yet" is not the same as "decided but hidden" — that difference is the whole subject.',
     board: () => new QState(5).x(0).h(2).h(3).z(3),
     hand: [],

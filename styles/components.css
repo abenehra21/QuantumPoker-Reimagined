@@ -1,0 +1,709 @@
+/*
+ * components.css — the parts. Buttons, panels, cards, orbs, chips, badges,
+ * tooltips, toggles. Nothing here knows which screen it is on.
+ */
+
+/* ====================== buttons ====================== */
+
+.btn {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  padding: var(--s3) var(--s5);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  letter-spacing: .02em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform var(--t-fast) var(--ease-back),
+              border-color var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease),
+              background var(--t-base) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The sheen that crosses a button on hover. */
+.btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 30%,
+    color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform var(--t-slow) var(--ease);
+  pointer-events: none;
+}
+.btn:hover::before { transform: translateX(120%); }
+
+.btn:hover {
+  border-color: var(--accent);
+  box-shadow: var(--glow-sm);
+  transform: translateY(-1px);
+}
+.btn:active { transform: translateY(1px) scale(.985); }
+.btn:disabled, .btn[aria-disabled="true"] {
+  opacity: .38; cursor: not-allowed; transform: none; box-shadow: none;
+}
+.btn:disabled::before { display: none; }
+
+.btn-primary {
+  background: linear-gradient(140deg,
+    color-mix(in srgb, var(--accent) 26%, transparent),
+    color-mix(in srgb, var(--accent-2) 18%, transparent));
+  border-color: color-mix(in srgb, var(--accent) 65%, transparent);
+  box-shadow: var(--glow-sm), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.btn-primary:hover { box-shadow: var(--glow), inset 0 1px 0 rgba(255,255,255,.2); }
+
+.btn-danger { border-color: color-mix(in srgb, var(--bad) 55%, transparent); }
+.btn-danger:hover { border-color: var(--bad); box-shadow: 0 0 22px color-mix(in srgb, var(--bad) 40%, transparent); }
+.btn-good { border-color: color-mix(in srgb, var(--good) 55%, transparent); }
+.btn-good:hover { border-color: var(--good); box-shadow: 0 0 22px color-mix(in srgb, var(--good) 40%, transparent); }
+
+.btn-ghost { background: transparent; border-color: var(--line); }
+.btn-ghost:hover { background: var(--glass); }
+
+.btn-sm { padding: var(--s2) var(--s3); font-size: var(--fs-sm); border-radius: var(--r-sm); }
+.btn-lg { padding: var(--s4) var(--s7); font-size: var(--fs-lg); border-radius: var(--r-lg); }
+.btn-icon { padding: var(--s2); width: 38px; height: 38px; border-radius: var(--r-sm); }
+.btn-icon .icon { width: 19px; height: 19px; }
+.btn-block { width: 100%; }
+
+.icon { width: 18px; height: 18px; flex: none; }
+
+/* ====================== panels ====================== */
+
+.panel {
+  position: relative;
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-2), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.panel-pad { padding: var(--s5); }
+.panel-hi { background: var(--glass-strong); border-color: var(--line-strong); box-shadow: var(--sh-3); }
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  color: var(--ink-mute);
+  margin-bottom: var(--s3);
+}
+
+.divider { height: 1px; background: var(--line); border: 0; margin: var(--s4) 0; }
+
+/* ====================== gate cards ====================== */
+
+.card {
+  position: relative;
+  width: 132px; height: 188px;
+  flex: none;
+  border-radius: var(--r-md);
+  background:
+    linear-gradient(170deg, rgba(20,30,60,.95), rgba(8,12,26,.98));
+  border: 1.5px solid var(--rarity, var(--common));
+  box-shadow: var(--sh-2);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transform-style: preserve-3d;
+  transition: transform var(--t-base) var(--ease-out),
+              box-shadow var(--t-base) var(--ease),
+              border-color var(--t-base) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* A slow shimmer across the face, faster for rarer cards. */
+.card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 38%,
+    color-mix(in srgb, var(--rarity, var(--common)) 22%, transparent) 50%, transparent 62%);
+  background-size: 300% 300%;
+  animation: card-shimmer var(--shimmer, 7s) linear infinite;
+  pointer-events: none; opacity: .55;
+}
+@keyframes card-shimmer {
+  from { background-position: 180% 0; }
+  to   { background-position: -80% 0; }
+}
+
+.card:hover, .card:focus-visible {
+  transform: translateY(-14px) scale(1.04);
+  box-shadow: var(--sh-4), 0 0 32px color-mix(in srgb, var(--rarity) 45%, transparent);
+  z-index: 5;
+}
+.card.selected {
+  transform: translateY(-22px) scale(1.06);
+  border-color: var(--ink);
+  box-shadow: var(--sh-4), 0 0 44px color-mix(in srgb, var(--rarity) 70%, transparent);
+  z-index: 6;
+}
+.card.spent { opacity: .25; pointer-events: none; transform: translateY(8px) scale(.94); }
+/* Your hand during the betting rounds: readable, but not yet yours to play. */
+.card.idle { opacity: .7; pointer-events: none; filter: saturate(.75); }
+.card.idle::after { animation: none; opacity: .2; }
+.card.dealing { animation: card-deal var(--t-lazy) var(--ease-out) backwards; }
+@keyframes card-deal {
+  from { transform: translate(var(--from-x, 0), var(--from-y, -260px)) rotate(var(--from-r, -30deg)) scale(.7); opacity: 0; }
+}
+
+.card-rarity-bar {
+  height: 3px; flex: none;
+  background: linear-gradient(90deg, transparent, var(--rarity), transparent);
+  box-shadow: 0 0 10px var(--rarity);
+}
+
+.card-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: var(--s2) var(--s3) 0;
+}
+.card-name {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm); font-weight: 700;
+  letter-spacing: .01em;
+}
+.card-gate {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--rarity);
+  opacity: .85;
+}
+
+.card-art {
+  flex: 1;
+  display: grid; place-items: center;
+  padding: var(--s2);
+  color: var(--rarity);
+  position: relative;
+}
+.card-art .gate-art { width: 74%; height: auto; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--rarity) 55%, transparent)); }
+
+/* A faint circuit grid behind the symbol. */
+.card-art::before {
+  content: ''; position: absolute; inset: var(--s2);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--rarity) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--rarity) 12%, transparent) 1px, transparent 1px);
+  background-size: 14px 14px;
+  opacity: .35; border-radius: var(--r-sm);
+  mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+}
+
+.card-foot {
+  padding: 0 var(--s3) var(--s3);
+  font-size: var(--fs-xs);
+  line-height: 1.32;
+  color: var(--ink-mute);
+  /* Blurbs run from six words to thirty; clamp to three lines rather than
+     let the longest one push the art out of the card. The tooltip carries
+     the full text. Only the -webkit- form here: pairing it with the modern
+     `line-clamp` shorthand makes engines fall back to `display: flow-root`
+     and the clamp silently stops working. */
+  height: 46px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.card-cost {
+  position: absolute; top: var(--s2); right: var(--s2);
+  font-family: var(--font-mono); font-size: var(--fs-xs);
+  background: rgba(0,0,0,.6); padding: 2px 6px; border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+}
+
+.card[data-rarity="common"]    { --rarity: var(--common);    --shimmer: 9s; }
+.card[data-rarity="rare"]      { --rarity: var(--rare);      --shimmer: 7s; }
+.card[data-rarity="epic"]      { --rarity: var(--epic);      --shimmer: 5s; }
+.card[data-rarity="legendary"] { --rarity: var(--legendary); --shimmer: 3.2s; }
+
+/* Legendary cards get a slow rotating conic halo. Nothing else does. */
+.card[data-rarity="legendary"]::before {
+  content: ''; position: absolute; inset: -40%;
+  background: conic-gradient(from 0deg,
+    transparent, color-mix(in srgb, var(--legendary) 40%, transparent), transparent 40%);
+  animation: legendary-spin 4.5s linear infinite;
+  pointer-events: none; opacity: .5;
+}
+@keyframes legendary-spin { to { transform: rotate(360deg); } }
+
+.card-mini {
+  width: 58px; height: 82px;
+}
+.card-mini .card-foot, .card-mini .card-gate { display: none; }
+.card-mini .card-name { font-size: 9px; }
+.card-mini .card-art .gate-art { width: 82%; }
+
+/* ====================== coin orbs ====================== */
+
+.orb {
+  position: relative;
+  width: var(--orb-size, 104px); height: var(--orb-size, 104px);
+  flex: none;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  cursor: pointer;
+  --tint: var(--coin-zero);
+  transition: transform var(--t-base) var(--ease-back), filter var(--t-base) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.orb:hover, .orb:focus-visible { transform: scale(1.09); }
+.orb.targetable { animation: orb-invite 1.6s var(--ease) infinite; }
+@keyframes orb-invite {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.35); }
+}
+.orb.chosen { transform: scale(1.14); }
+.orb.dimmed { opacity: .32; filter: saturate(.3); pointer-events: none; }
+
+.orb-body {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--tint) 70%, white 10%), transparent 42%),
+    radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--tint) 34%, transparent), transparent 70%),
+    radial-gradient(circle at 50% 50%, rgba(6,10,22,.92), rgba(4,7,16,.98));
+  border: 1.5px solid color-mix(in srgb, var(--tint) 60%, transparent);
+  box-shadow:
+    0 0 calc(var(--orb-size, 104px) * 0.3) color-mix(in srgb, var(--tint) 40%, transparent),
+    inset 0 0 26px color-mix(in srgb, var(--tint) 18%, transparent);
+}
+
+/* The equator ring. Its tilt animates with the probability. */
+.orb-ring {
+  position: absolute; inset: 9%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--tint) 45%, transparent);
+  transform: rotateX(72deg);
+  animation: orb-spin var(--spin-time, 3s) linear infinite;
+  pointer-events: none;
+}
+.orb-ring.two { inset: 18%; transform: rotateX(72deg) rotateY(60deg); animation-direction: reverse; }
+@keyframes orb-spin { to { transform: rotateX(72deg) rotateZ(360deg); } }
+
+.orb-face {
+  position: relative; z-index: 2;
+  font-family: var(--font-display);
+  font-size: calc(var(--orb-size, 104px) * 0.34);
+  font-weight: 700;
+  color: var(--tint);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--tint) 75%, transparent);
+  line-height: 1;
+}
+.orb-prob {
+  position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: var(--fs-xs);
+  color: var(--ink-mute); white-space: nowrap;
+}
+.orb-index {
+  position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: var(--fs-xs);
+  color: var(--ink-faint);
+}
+
+.orb[data-kind="one"]    { --tint: var(--coin-one); }
+.orb[data-kind="zero"]   { --tint: var(--coin-zero); }
+.orb[data-kind="plus"]   { --tint: var(--coin-plus); }
+.orb[data-kind="minus"]  { --tint: var(--coin-minus); }
+.orb[data-kind="tilted"] { --tint: var(--coin-tilted); }
+.orb[data-kind="linked"] { --tint: var(--coin-linked); }
+
+/* Settled coins stop spinning. That is the whole visual language. */
+.orb[data-kind="one"] .orb-ring,
+.orb[data-kind="zero"] .orb-ring { animation-play-state: paused; opacity: .3; }
+
+.orb.collapsing { animation: orb-collapse 620ms var(--ease-out); }
+@keyframes orb-collapse {
+  0%   { transform: scale(1); filter: brightness(1); }
+  35%  { transform: scale(.72); filter: brightness(2.4) blur(2px); }
+  55%  { transform: scale(1.22); filter: brightness(3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+.orb.struck { animation: orb-struck 420ms var(--ease-out); }
+@keyframes orb-struck {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.2) rotate(-4deg); }
+  60%  { transform: scale(.94) rotate(3deg); }
+  100% { transform: scale(1); }
+}
+
+/* Entanglement arcs are drawn in SVG over the orb row. */
+.link-layer { position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: visible; }
+.link-arc {
+  fill: none;
+  stroke: var(--coin-linked);
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 7px var(--coin-linked));
+  stroke-dasharray: 6 7;
+  animation: link-flow 1.4s linear infinite;
+}
+.link-arc.weak { opacity: .4; stroke-width: 1.2; stroke-dasharray: 3 8; }
+@keyframes link-flow { to { stroke-dashoffset: -26; } }
+
+/* ====================== chips ====================== */
+
+.chip-stack { position: relative; display: inline-block; height: 34px; }
+.chip-art { width: 26px; height: 26px; display: block; position: absolute; left: 0; }
+.chip-art:nth-child(n) { filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+
+.chip-fly {
+  position: fixed; z-index: 60; pointer-events: none;
+  width: 26px; height: 26px;
+  transition: transform var(--t-lazy) var(--ease-out), opacity var(--t-slow) var(--ease);
+}
+
+.pot {
+  display: inline-flex; align-items: baseline; gap: var(--s2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--amber) 55%, transparent);
+}
+.pot.bumping { animation: pot-bump 420ms var(--ease-back); }
+@keyframes pot-bump {
+  0% { transform: scale(1); } 45% { transform: scale(1.18); } 100% { transform: scale(1); }
+}
+
+/* ====================== badges, pills, tags ====================== */
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px var(--s2);
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--tone, var(--accent)) 45%, transparent);
+  background: color-mix(in srgb, var(--tone, var(--accent)) 12%, transparent);
+  color: var(--tone, var(--accent));
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.bad { --tone: var(--bad); }
+.badge.good { --tone: var(--good); }
+.badge.warn { --tone: var(--warn); }
+
+.pill {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  padding: var(--s1) var(--s3);
+  border-radius: var(--r-pill);
+  background: rgba(0,0,0,.35);
+  border: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+
+.tag-rarity { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .12em; font-weight: 700; }
+.tag-rarity[data-r="common"] { color: var(--common); }
+.tag-rarity[data-r="rare"] { color: var(--rare); }
+.tag-rarity[data-r="epic"] { color: var(--epic); }
+.tag-rarity[data-r="legendary"] { color: var(--legendary); }
+
+/* ====================== seats ====================== */
+
+.seat {
+  position: relative;
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  transition: border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease), opacity var(--t-base) var(--ease);
+  min-width: 178px;
+}
+.seat.acting {
+  border-color: var(--accent);
+  box-shadow: var(--glow-sm);
+  transform: translateY(-3px);
+}
+.seat.acting::after {
+  content: ''; position: absolute; inset: -1px;
+  border-radius: inherit; pointer-events: none;
+  border: 1px solid var(--accent);
+  animation: seat-pulse 1.5s var(--ease) infinite;
+}
+@keyframes seat-pulse { 0%,100% { opacity: .2; } 50% { opacity: .9; } }
+.seat.folded { opacity: .38; filter: grayscale(.6); }
+.seat.out { opacity: .2; }
+.seat.winner { border-color: var(--amber); box-shadow: 0 0 34px color-mix(in srgb, var(--amber) 45%, transparent); }
+.seat.boss { border-color: var(--legendary); }
+
+.avatar {
+  width: 46px; height: 46px; flex: none;
+  border-radius: var(--r-sm);
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--seat-accent, var(--accent)) 30%, transparent), transparent 70%), rgba(6,10,22,.8);
+  border: 1px solid color-mix(in srgb, var(--seat-accent, var(--accent)) 45%, transparent);
+  color: var(--seat-accent, var(--accent));
+  overflow: hidden;
+}
+.avatar-art { width: 72%; height: 72%; }
+.avatar.thinking { animation: avatar-think 1.1s var(--ease) infinite; }
+@keyframes avatar-think { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); } }
+
+.seat-name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-sm); }
+.seat-chips { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--amber); }
+.seat-bet {
+  font-family: var(--font-mono); font-size: var(--fs-xs);
+  color: var(--ink-mute);
+}
+.seat-status { display: flex; gap: 3px; margin-top: 2px; }
+.status-dot {
+  width: 17px; height: 17px; border-radius: var(--r-xs);
+  display: grid; place-items: center;
+  font-size: 10px;
+  background: color-mix(in srgb, var(--tone) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 50%, transparent);
+  color: var(--tone);
+}
+
+/* Speech from an opponent. */
+.speech {
+  position: absolute; bottom: calc(100% + 8px); left: var(--s3);
+  max-width: 230px;
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-md);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--sh-3);
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  animation: speech-in 240ms var(--ease-back);
+  z-index: 8;
+}
+.speech::after {
+  content: ''; position: absolute; top: 100%; left: 18px;
+  border: 6px solid transparent; border-top-color: var(--surface-solid);
+}
+@keyframes speech-in {
+  from { opacity: 0; transform: translateY(6px) scale(.92); }
+}
+
+/* ====================== tooltips ====================== */
+
+.tooltip {
+  position: fixed; z-index: 120;
+  max-width: 320px;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(8, 12, 26, .97);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--sh-4);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease-out);
+}
+.tooltip.show { opacity: 1; transform: none; }
+.tooltip h4 {
+  font-size: var(--fs-md); margin-bottom: var(--s1);
+  color: var(--tone, var(--accent));
+}
+.tooltip .physics {
+  margin-top: var(--s2); padding-top: var(--s2);
+  border-top: 1px solid var(--line);
+  color: var(--ink-mute); font-size: var(--fs-xs);
+  font-style: italic;
+}
+.tooltip .hint-line {
+  margin-top: var(--s2); color: var(--warn); font-size: var(--fs-xs);
+}
+
+/* A dotted underline marks any word the encyclopedia can explain. */
+.term {
+  border-bottom: 1px dotted color-mix(in srgb, var(--accent) 60%, transparent);
+  cursor: help;
+}
+.term:hover { color: var(--accent); }
+
+/* ====================== form controls ====================== */
+
+.field { display: flex; flex-direction: column; gap: var(--s2); }
+.field label { font-size: var(--fs-sm); color: var(--ink-soft); }
+
+.input, .select {
+  padding: var(--s2) var(--s3);
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  transition: border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+}
+.input:focus, .select:focus { border-color: var(--accent); box-shadow: var(--glow-sm); }
+
+.slider { -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent; cursor: pointer; }
+.slider::-webkit-slider-runnable-track {
+  height: 5px; border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--accent) var(--pct, 50%), var(--steel) var(--pct, 50%));
+}
+.slider::-moz-range-track { height: 5px; border-radius: var(--r-pill); background: var(--steel); }
+.slider::-moz-range-progress { height: 5px; border-radius: var(--r-pill); background: var(--accent); }
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; margin-top: -5.5px;
+  border-radius: 50%; background: var(--ink);
+  box-shadow: 0 0 12px var(--accent); border: 2px solid var(--accent);
+  transition: transform var(--t-fast) var(--ease-back);
+}
+.slider::-webkit-slider-thumb:hover { transform: scale(1.22); }
+.slider::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--ink); border: 2px solid var(--accent); box-shadow: 0 0 12px var(--accent);
+}
+
+.switch {
+  position: relative; width: 46px; height: 25px; flex: none;
+  border-radius: var(--r-pill);
+  background: var(--steel);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease), border-color var(--t-base) var(--ease);
+}
+.switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 19px; height: 19px; border-radius: 50%;
+  background: var(--ink-mute);
+  transition: transform var(--t-base) var(--ease-back), background var(--t-base) var(--ease);
+}
+.switch[aria-checked="true"] {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: var(--accent);
+}
+.switch[aria-checked="true"]::after { transform: translateX(21px); background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+.segmented {
+  display: inline-flex; padding: 3px; gap: 3px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.segmented button {
+  padding: var(--s1) var(--s3);
+  border: 0; background: transparent;
+  border-radius: var(--r-sm);
+  color: var(--ink-mute);
+  font-size: var(--fs-sm); cursor: pointer;
+  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+.segmented button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent);
+}
+.segmented button:hover:not([aria-pressed="true"]) { color: var(--ink); }
+
+/* ====================== toasts and notifications ====================== */
+
+.toasts {
+  position: fixed; top: var(--s4); right: var(--s4);
+  z-index: 130;
+  display: flex; flex-direction: column; gap: var(--s2);
+  pointer-events: none;
+  max-width: min(360px, 84vw);
+}
+.toast {
+  display: flex; align-items: flex-start; gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(8,12,26,.96);
+  border: 1px solid var(--tone, var(--line-strong));
+  border-left-width: 3px;
+  box-shadow: var(--sh-3);
+  animation: toast-in 380ms var(--ease-back);
+  font-size: var(--fs-sm);
+}
+.toast.leaving { animation: toast-out 300ms var(--ease) forwards; }
+@keyframes toast-in { from { opacity: 0; transform: translateX(40px) scale(.94); } }
+@keyframes toast-out { to { opacity: 0; transform: translateX(40px) scale(.94); } }
+.toast-icon { font-size: var(--fs-lg); color: var(--tone, var(--accent)); line-height: 1.1; }
+.toast-title { font-weight: 700; font-family: var(--font-display); }
+.toast-body { color: var(--ink-soft); font-size: var(--fs-xs); }
+
+/* ====================== overlays ====================== */
+
+.overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-items: center;
+  background: rgba(3, 5, 12, .74);
+  backdrop-filter: var(--blur-heavy);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--t-base) var(--ease);
+  padding: var(--s4);
+}
+.overlay.open { opacity: 1; pointer-events: auto; }
+.overlay-card {
+  width: min(760px, 94vw);
+  max-height: min(86vh, 880px);
+  display: flex; flex-direction: column;
+  transform: translateY(18px) scale(.97);
+  transition: transform var(--t-slow) var(--ease-out);
+}
+.overlay.open .overlay-card { transform: none; }
+.overlay-head {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s5) var(--s5) var(--s3);
+  border-bottom: 1px solid var(--line);
+}
+.overlay-body { padding: var(--s5); overflow-y: auto; }
+.overlay-foot {
+  padding: var(--s3) var(--s5) var(--s5);
+  display: flex; gap: var(--s3); justify-content: flex-end;
+  border-top: 1px solid var(--line);
+}
+
+/* ====================== progress ====================== */
+
+.bar {
+  height: 7px; border-radius: var(--r-pill);
+  background: rgba(0,0,0,.45);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.bar > i {
+  display: block; height: 100%;
+  width: var(--val, 0%);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
+  transition: width var(--t-slow) var(--ease-out);
+}
+.bar.good > i { background: linear-gradient(90deg, var(--good), var(--cyan)); }
+.bar.warn > i { background: linear-gradient(90deg, var(--warn), var(--rose)); }
+
+/* ====================== tables ====================== */
+
+.data-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.data-table th {
+  text-align: left; padding: var(--s2) var(--s3);
+  font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .12em;
+  color: var(--ink-mute); border-bottom: 1px solid var(--line);
+  font-weight: 600;
+}
+.data-table td { padding: var(--s2) var(--s3); border-bottom: 1px solid rgba(125,211,252,.06); }
+.data-table tr:hover td { background: rgba(125,211,252,.04); }
+.data-table .num { font-family: var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ====================== loading ====================== */
+
+.spinner {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  animation: spin 800ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

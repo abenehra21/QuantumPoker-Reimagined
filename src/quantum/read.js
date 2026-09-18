@@ -74,21 +74,64 @@ export function findLinks(st) {
 }
 
 /**
- * Softer than findLinks: every pair with *any* correlation, and how strong.
- * The table draws these as faint arcs so a partial link is still visible,
- * which matters once rotation gates and noise are in the deck.
+ * Softer than findLinks: every pair whose outcomes are related at all, and
+ * how strongly. The table draws these as faint arcs so a partial link is
+ * still visible once rotation gates and noise are in the deck.
+ *
+ * The measure is the normalised mutual information of the two coins'
+ * measurement outcomes: knowing how coin a lands, how much do you now know
+ * about coin b? That is precisely the question a player is asking, and it is
+ * 1 for a Bell pair and 0 for two independent coins.
+ *
+ * The obvious shortcut — Bell-state overlap — is wrong, and wrong in a way
+ * that looks plausible: a plain |00> pair overlaps both |00>+|11> and
+ * |00>-|11> at one half each, so every freshly dealt board would draw arcs
+ * between coins that have nothing to do with each other.
  */
 export function findCorrelations(st, threshold = 0.08) {
   const out = [];
   for (let i = 0; i < st.n - 1; i++) {
     for (let j = i + 1; j < st.n; j++) {
-      const p = st.bellProbs(i, j);
-      const best = Math.max(...p);
-      const strength = Math.max(0, (best - 0.25) / 0.75);
-      if (strength > threshold) out.push({ a: i, b: j, strength, same: p.indexOf(best) < 2 });
+      const c = correlation(st, i, j);
+      if (c.strength > threshold) out.push({ a: i, b: j, strength: c.strength, same: c.same });
     }
   }
   return out;
+}
+
+/**
+ * The joint outcome distribution of two coins, and what it implies.
+ * Returns { joint, strength, same } where strength is in [0, 1].
+ */
+export function correlation(st, qa, qb) {
+  const ba = 1 << qa, bb = 1 << qb;
+  const joint = [0, 0, 0, 0];             // p00, p01, p10, p11
+  for (let k = 0; k < st.size; k++) {
+    const p = st.re[k] * st.re[k] + st.im[k] * st.im[k];
+    if (p < 1e-15) continue;
+    joint[((k & ba) ? 2 : 0) | ((k & bb) ? 1 : 0)] += p;
+  }
+  const pa1 = joint[2] + joint[3], pb1 = joint[1] + joint[3];
+  const ha = binaryEntropy(pa1), hb = binaryEntropy(pb1);
+  const floor = Math.min(ha, hb);
+  if (floor < 1e-9) return { joint, strength: 0, same: true, mi: 0 };
+
+  let mi = 0;
+  const marg = [(1 - pa1) * (1 - pb1), (1 - pa1) * pb1, pa1 * (1 - pb1), pa1 * pb1];
+  for (let k = 0; k < 4; k++) {
+    if (joint[k] < 1e-12 || marg[k] < 1e-12) continue;
+    mi += joint[k] * Math.log2(joint[k] / marg[k]);
+  }
+  return {
+    joint, mi,
+    strength: Math.max(0, Math.min(1, mi / floor)),
+    same: joint[0] + joint[3] >= 0.5
+  };
+}
+
+function binaryEntropy(p) {
+  if (p <= 1e-12 || p >= 1 - 1e-12) return 0;
+  return -p * Math.log2(p) - (1 - p) * Math.log2(1 - p);
 }
 
 /** Expected number of coins landing 1 among the first `upTo`. */

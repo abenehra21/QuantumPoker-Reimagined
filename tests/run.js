@@ -6,7 +6,7 @@
  * answers rather than against itself.
  */
 import { QState } from '../src/quantum/state.js';
-import { readCoin, findLinks, dealBoard, expectedScore, entropy, scoreDistribution, probAtLeast, boardFrom } from '../src/quantum/read.js';
+import { readCoin, findLinks, findCorrelations, correlation, dealBoard, expectedScore, entropy, scoreDistribution, probAtLeast, boardFrom } from '../src/quantum/read.js';
 import { PROFILES, NoiseProfile, zeroNoiseExtrapolate } from '../src/quantum/noise.js';
 import { Circuit, summarise } from '../src/quantum/circuit.js';
 import { CARDS, CARD_IDS, playCard, legal, byRarity, RARITY } from '../src/gameplay/cards.js';
@@ -154,6 +154,37 @@ section('board reading');
   near('score distribution sums to 1', d.reduce((a, b) => a + b, 0), 1, 1e-9);
   near('five coin tosses: P(5 ones) = 1/32', d[5], 1 / 32, 1e-9);
   near('probAtLeast agrees', probAtLeast(flat, 5), 1 / 32, 1e-9);
+
+  // Correlation arcs must mean something. The tempting measure (Bell-state
+  // overlap) calls two plain |0> coins correlated, which would draw arcs all
+  // over a freshly dealt board.
+  ok('two settled coins are not correlated', findCorrelations(new QState(5)).length === 0);
+  ok('nor are two coins on 1', findCorrelations(new QState(5).x(0).x(1)).length === 0);
+  ok('nor two independent coin tosses', findCorrelations(new QState(5).h(0).h(1)).length === 0);
+  ok('a Bell pair is perfectly correlated', (() => {
+    const c = findCorrelations(new QState(5).h(0).cx(0, 1));
+    return c.length === 1 && Math.abs(c[0].strength - 1) < 1e-9 && c[0].same;
+  })());
+  ok('an anti-correlated pair is seen as opposite', (() => {
+    const c = correlation(new QState(5).h(0).x(1).cx(0, 1), 0, 1);
+    return Math.abs(c.strength - 1) < 1e-9 && c.same === false;
+  })());
+  ok('a phase-only gate creates no outcome correlation',
+    findCorrelations(new QState(5).h(0).cphase(0, 1, Math.PI / 2)).length === 0);
+  ok('a partial rotation still correlates', (() => {
+    const c = correlation(new QState(5).ry(0, 0.7).cx(0, 1), 0, 1);
+    return c.strength > 0.5;
+  })());
+  ok('correlation never exceeds 1', (() => {
+    for (let i = 0; i < 60; i++) {
+      const b = dealBoard(rng, 5);
+      for (let a = 0; a < 5; a++) for (let c = a + 1; c < 5; c++) {
+        const r = correlation(b, a, c);
+        if (r.strength < -1e-9 || r.strength > 1 + 1e-9) return false;
+      }
+    }
+    return true;
+  })());
 
   // Dealt boards are playable and never already won.
   let bad = 0;
@@ -733,6 +764,18 @@ section('teaching');
     }
     return fails.length === 0 ? true : fails.join(',');
   })() === true, 'unsolvable lessons');
+  // Lesson prose makes factual claims about its own board. Check the ones
+  // that are countable, so the text cannot drift away from the physics.
+  ok('lesson 1 counts its own coins correctly', (() => {
+    const l = LESSONS[0];
+    const b = l.board();
+    let settled = 0;
+    for (let q = 0; q < b.n; q++) if (readCoin(b, q).settled) settled++;
+    const words = ['zero', 'one', 'two', 'three', 'four', 'five'];
+    return l.text.toLowerCase().includes(words[settled] + ' of these are already decided')
+      && l.text.toLowerCase().includes(words[b.n - settled] + ' are not');
+  })());
+
   ok('the codex covers the syllabus', CODEX.length >= 12, CODEX.length);
   ok('every codex entry has a body and a demo',
     CODEX.every((c) => c.title && c.body && c.body.length > 120));

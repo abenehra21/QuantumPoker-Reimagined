@@ -1,0 +1,16 @@
+{
+  "name": "quantum-poker-reimagined",
+  "version": "2.0.0",
+  "description": "Texas Hold'em where the community cards are qubits and your hand is a set of quantum gates. A real state-vector simulator behind a neon casino.",
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000",
+    "test": "node tests/run.js",
+    "check": "node tools/check.js"
+  },
+  "keywords": ["quantum-computing", "poker", "game", "education", "qubit", "webaudio", "canvas"],
+  "engines": { "node": ">=18" }
+}
