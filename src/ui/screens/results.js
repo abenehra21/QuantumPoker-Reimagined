@@ -6,16 +6,14 @@
  * the odds were before the coins landed, and what the better line would
  * have been. This is the part that turns a lucky win into a lesson.
  */
-import { h, clear, num, pct, trapFocus } from '../dom.js';
+import { h, clear, num, trapFocus } from '../dom.js';
 import { wireTerms } from '../tooltip.js';
 import { icon } from '../../render/art.js';
-import { cardEl } from '../components/card.js';
 import { rankName } from '../../gameplay/game.js';
 import { CARDS } from '../../gameplay/cards.js';
 import { plan, SKILL, describeLine } from '../../gameplay/planner.js';
 import { scoreDistribution, entropy, findLinks } from '../../quantum/read.js';
 import { SFX } from '../../audio/sfx.js';
-import { wait } from '../../engine/tween.js';
 
 let overlay = null;
 

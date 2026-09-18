@@ -10,7 +10,6 @@
  */
 import { loop, fitCanvas } from '../engine/loop.js';
 import { mulberry32 } from '../utils/rng.js';
-import { clamp01 } from '../engine/tween.js';
 
 export class Background {
   constructor(canvas, opts = {}) {

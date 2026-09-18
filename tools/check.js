@@ -76,6 +76,30 @@ for (const f of jsFiles) {
 }
 console.log(`  ${failures - before} layering violations`);
 
+/* ---- 2b. unused imports ---- */
+console.log('imports');
+{
+  const before = failures;
+  for (const f of jsFiles) {
+    const src = readFileSync(f, 'utf8');
+    for (const m of src.matchAll(/import\s+\{([^}]+)\}\s+from\s+['"][^'"]+['"]/g)) {
+      for (const raw of m[1].split(',')) {
+        const name = raw.trim().split(/\s+as\s+/).pop().trim();
+        if (!name) continue;
+        // Count uses outside the import statements themselves. `$` and `$$`
+        // are not word characters, so \b would never match them.
+        const body = src.replace(/import\s+[^;]+;/g, '');
+        const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = /^[A-Za-z_]/.test(name) ? `\\b${esc}\\b` : `(?<![\\w$])${esc}(?![\\w$])`;
+        if (!new RegExp(pattern).test(body)) {
+          fail(`${relative(ROOT, f)} imports ${name} and never uses it`);
+        }
+      }
+    }
+  }
+  console.log(`  ${failures - before} unused imports`);
+}
+
 /* ---- 3. CSS variables ---- */
 console.log('css');
 const cssBefore = failures;

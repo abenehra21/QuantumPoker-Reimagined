@@ -12,7 +12,6 @@
  */
 import { plan, SKILL } from '../gameplay/planner.js';
 import { expectedScore } from '../quantum/read.js';
-import { CARDS } from '../gameplay/cards.js';
 
 /** What an average hand of cards adds to an average board. Measured; see tests. */
 export const AVG_UPLIFT = 1.15;

@@ -5,19 +5,18 @@
  * full outcome distribution. No chips, no opponents, no clock. This is the
  * screen a lecturer would actually project.
  */
-import { h, clear, copy, pct } from '../dom.js';
+import { h, clear, copy } from '../dom.js';
 import { icon } from '../../render/art.js';
 import { cardEl } from '../components/card.js';
 import { orbEl, updateOrb, drawLinks } from '../components/orb.js';
 import { toast, errorToast } from '../toast.js';
-import { wireTerms } from '../tooltip.js';
 import { SFX } from '../../audio/sfx.js';
 import { loop } from '../../engine/loop.js';
 import { bump } from '../../save/store.js';
 
 import { QState } from '../../quantum/state.js';
 import { Circuit, summarise } from '../../quantum/circuit.js';
-import { CARDS, CARD_IDS, byRarity, playCard, legal } from '../../gameplay/cards.js';
+import { CARDS, byRarity, playCard, legal } from '../../gameplay/cards.js';
 import { dealBoard, readCoin, findLinks, findCorrelations, entropy, scoreDistribution } from '../../quantum/read.js';
 import { BlochSphere } from '../../render/bloch.js';
 import { CircuitView } from '../../render/circuit.js';

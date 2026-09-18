@@ -7,7 +7,6 @@
  * make some people feel ill.
  */
 import { loop } from '../engine/loop.js';
-import { clamp01, EASE } from '../engine/tween.js';
 
 export class VFX {
   constructor(root) {

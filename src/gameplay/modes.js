@@ -5,7 +5,7 @@
  * or the physics; it changes who you face, how noisy the hardware is, and how
  * much the deck is allowed to surprise you.
  */
-import { PROFILES, NoiseProfile } from '../quantum/noise.js';
+import { PROFILES } from '../quantum/noise.js';
 import { SKILL } from './planner.js';
 
 export const MODES = {

@@ -6,7 +6,7 @@
  * screen alive so returning to the menu does not rebuild the world, and
  * cross-fades between them.
  */
-import { h, clear } from './dom.js';
+import { h } from './dom.js';
 import { wireTerms, hide as hideTooltip } from './tooltip.js';
 import { SFX } from '../audio/sfx.js';
 import { music } from '../audio/music.js';

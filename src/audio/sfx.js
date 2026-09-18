@@ -7,7 +7,7 @@
  * Each sound is named for the thing that makes it, not for how it is built,
  * so `SFX.collapse()` stays correct when the synthesis is rewritten.
  */
-import { init, unlock, tone, noise, metal, buses, now, running } from './synth.js';
+import { init, unlock, tone, noise, metal, now, running } from './synth.js';
 
 let muted = false;
 let lastAt = 0;

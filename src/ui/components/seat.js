@@ -8,7 +8,6 @@
 import { h, num } from '../dom.js';
 import { attach } from '../tooltip.js';
 import { avatarArt } from '../../render/art.js';
-import { STATUSES } from '../../gameplay/status.js';
 
 export function seatEl(player, opts = {}) {
   const accent = player.bot && player.bot.accent ? player.bot.accent : 'var(--cyan)';

@@ -14,7 +14,6 @@ import { toast, errorToast } from '../toast.js';
 import { wireTerms } from '../tooltip.js';
 import { SFX } from '../../audio/sfx.js';
 import { loop } from '../../engine/loop.js';
-import { wait } from '../../engine/tween.js';
 import { update } from '../../save/store.js';
 
 import { LESSONS } from '../../tutorial/lessons.js';

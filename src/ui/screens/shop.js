@@ -10,10 +10,10 @@ import { cardEl } from '../components/card.js';
 import { attach, wireTerms } from '../tooltip.js';
 import { toast, errorToast } from '../toast.js';
 import { SFX } from '../../audio/sfx.js';
-import { priceFor, rerollCost, COSMETICS } from '../../gameplay/shop.js';
+import { priceFor } from '../../gameplay/shop.js';
 import { RELICS } from '../../gameplay/relics.js';
 import { CARDS, RARITY } from '../../gameplay/cards.js';
-import { MODES, targetFor } from '../../gameplay/modes.js';
+import { targetFor } from '../../gameplay/modes.js';
 import { bossFor, isBossRound } from '../../gameplay/bosses.js';
 import { clearRun } from '../../save/store.js';
 

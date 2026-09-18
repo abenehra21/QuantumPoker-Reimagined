@@ -6,24 +6,24 @@
  * answers rather than against itself.
  */
 import { QState } from '../src/quantum/state.js';
-import { readCoin, findLinks, findCorrelations, correlation, dealBoard, expectedScore, entropy, scoreDistribution, probAtLeast, boardFrom } from '../src/quantum/read.js';
-import { PROFILES, NoiseProfile, zeroNoiseExtrapolate } from '../src/quantum/noise.js';
+import { readCoin, findLinks, findCorrelations, correlation, dealBoard, entropy, scoreDistribution, probAtLeast, boardFrom } from '../src/quantum/read.js';
+import { PROFILES, zeroNoiseExtrapolate } from '../src/quantum/noise.js';
 import { Circuit, summarise } from '../src/quantum/circuit.js';
 import { CARDS, CARD_IDS, playCard, legal, byRarity, RARITY } from '../src/gameplay/cards.js';
-import { plan, SKILL, describeLine, evaluate } from '../src/gameplay/planner.js';
+import { plan, SKILL, describeLine } from '../src/gameplay/planner.js';
 import { Game, rankKey, buildPots, rankName } from '../src/gameplay/game.js';
 import { StatusSet } from '../src/gameplay/status.js';
 import { RelicSet, RELICS, RELIC_IDS } from '../src/gameplay/relics.js';
 import { MODES, MODE_KEYS, CHAOS_EVENTS, targetFor } from '../src/gameplay/modes.js';
-import { BOSSES, bossFor, isBossRound } from '../src/gameplay/bosses.js';
-import { stock, priceFor, rerollCost, COSMETICS } from '../src/gameplay/shop.js';
+import { BOSSES, isBossRound } from '../src/gameplay/bosses.js';
+import { stock, priceFor, rerollCost } from '../src/gameplay/shop.js';
 import { Run } from '../src/gameplay/run.js';
 import { PERSONAS, PERSONA_KEYS, chooseOpponents } from '../src/ai/personalities.js';
 import { step, decide, strength, HeroWatcher } from '../src/ai/brain.js';
 import { speak } from '../src/ai/dialogue.js';
 import { ACHIEVEMENTS, check as checkAch } from '../src/save/achievements.js';
 import { blankProfile } from '../src/save/store.js';
-import { mulberry32, mix, seedFrom, shuffle, range } from '../src/utils/rng.js';
+import { mulberry32, mix, shuffle } from '../src/utils/rng.js';
 import { LESSONS } from '../src/tutorial/lessons.js';
 import { CODEX } from '../src/tutorial/codex.js';
 

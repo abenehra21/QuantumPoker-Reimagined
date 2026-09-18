@@ -11,7 +11,7 @@
  * picture of entanglement anyone has come up with.
  */
 import { loop, fitCanvas } from '../engine/loop.js';
-import { lerp, damp, clamp01 } from '../engine/tween.js';
+import { lerp, damp } from '../engine/tween.js';
 
 export const BLOCH_THEMES = {
   default: { wire: 'rgba(125,211,252,0.28)', equator: 'rgba(192,132,252,0.45)',

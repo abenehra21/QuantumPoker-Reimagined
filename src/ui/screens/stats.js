@@ -5,13 +5,12 @@
  * are hand-drawn SVG: a bar chart and a sparkline are twenty lines each and
  * a charting library is two hundred kilobytes.
  */
-import { h, clear, num, pct } from '../dom.js';
+import { h, num, pct } from '../dom.js';
 import { icon } from '../../render/art.js';
 import { attach } from '../tooltip.js';
 import { ACHIEVEMENTS, progress } from '../../save/achievements.js';
 import { CARDS, RARITY, CARD_IDS } from '../../gameplay/cards.js';
 import { BOSSES } from '../../gameplay/bosses.js';
-import { SFX } from '../../audio/sfx.js';
 
 export const title = 'Statistics';
 export const mood = 'menu';

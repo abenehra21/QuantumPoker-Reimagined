@@ -5,7 +5,7 @@
  * coin, and the raw readout. This is the "show me the physics" drawer, and
  * it is available at every moment of every hand.
  */
-import { h, clear, copy, pct } from '../dom.js';
+import { h, clear, copy } from '../dom.js';
 import { icon } from '../../render/art.js';
 import { CircuitView } from '../../render/circuit.js';
 import { BlochSphere } from '../../render/bloch.js';

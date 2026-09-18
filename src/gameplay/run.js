@@ -8,7 +8,7 @@
 import { Game } from './game.js';
 import { MODES, optionsFor, CHAOS_EVENTS, targetFor } from './modes.js';
 import { bossFor, isBossRound } from './bosses.js';
-import { chooseOpponents, PERSONAS } from '../ai/personalities.js';
+import { chooseOpponents } from '../ai/personalities.js';
 import { HeroWatcher } from '../ai/brain.js';
 import { starterDeck } from './cards.js';
 import { SKILL } from './planner.js';

@@ -5,7 +5,6 @@
  * everything else one keystroke away.
  */
 import { h, num } from '../dom.js';
-import { icon } from '../../render/art.js';
 import { SFX } from '../../audio/sfx.js';
 import { dailyState } from '../../save/store.js';
 import { progress } from '../../save/achievements.js';

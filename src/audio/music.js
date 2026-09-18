@@ -10,7 +10,7 @@
  * Everything is scheduled a bar ahead on the WebAudio clock, so it stays in
  * time even when the main thread is busy dealing cards.
  */
-import { init, unlock, tone, noise, buses, context, running } from './synth.js';
+import { init, unlock, tone, noise, buses, context } from './synth.js';
 
 const SCALES = {
   minor: [0, 2, 3, 5, 7, 8, 10],

@@ -15,7 +15,7 @@
  * nothing else.
  */
 import { QState } from '../quantum/state.js';
-import { readCoin, findLinks, expectedScore, scoreDistribution } from '../quantum/read.js';
+import { readCoin, findLinks, expectedScore } from '../quantum/read.js';
 
 export const RARITY = {
   common:    { key: 'common',    name: 'Common',    tint: '#6ee7ff', weight: 100, price: 24,  glow: 0.35 },

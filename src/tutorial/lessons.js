@@ -9,7 +9,7 @@
  * ship unsolvable.
  */
 import { QState } from '../quantum/state.js';
-import { readCoin, findLinks, expectedScore } from '../quantum/read.js';
+import { findLinks } from '../quantum/read.js';
 
 const ones = (st, n = 5) => { let c = 0; for (let q = 0; q < n; q++) if (st.probOne(q) > 1 - 1e-6) c++; return c; };
 

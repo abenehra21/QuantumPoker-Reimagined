@@ -15,8 +15,6 @@
  * mean, which is exact for score and only approximate for the tiebreak.
  */
 import { CARDS, legal } from './cards.js';
-import { expectedScore } from '../quantum/read.js';
-import { Circuit } from '../quantum/circuit.js';
 import { simulateCard } from './cards.js';
 import { mulberry32 } from '../utils/rng.js';
 

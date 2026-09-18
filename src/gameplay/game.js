@@ -8,15 +8,14 @@
  * No DOM anywhere in this file. The whole game can be driven from a script,
  * which is how the bots, the self-checks and the replay system use it.
  */
-import { QState } from '../quantum/state.js';
 import { Circuit } from '../quantum/circuit.js';
-import { dealBoard, readCoin, findLinks, expectedScore, entropy, scoreDistribution } from '../quantum/read.js';
+import { dealBoard, findLinks, entropy, scoreDistribution } from '../quantum/read.js';
 import { PROFILES, NoiseProfile } from '../quantum/noise.js';
 import { CARDS, playCard, legal, starterDeck } from './cards.js';
 import { plan, SKILL, describeLine } from './planner.js';
 import { StatusSet } from './status.js';
 import { RelicSet } from './relics.js';
-import { mulberry32, mix, shuffle, pickWeighted } from '../utils/rng.js';
+import { mulberry32, mix, pickWeighted } from '../utils/rng.js';
 
 export const RANKS = ['Blank', 'One', 'Pair', 'Trips', 'Quads', 'Coherence'];
 export const STREETS = ['Deal', 'Flop', 'Turn', 'River'];

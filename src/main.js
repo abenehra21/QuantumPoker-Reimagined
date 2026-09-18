@@ -10,7 +10,6 @@ import { loop } from './engine/loop.js';
 import { $, h } from './ui/dom.js';
 import { toast } from './ui/toast.js';
 import { hide as hideTooltip } from './ui/tooltip.js';
-import { SFX } from './audio/sfx.js';
 
 import * as menu from './ui/screens/menu.js';
 import * as modes from './ui/screens/modes.js';

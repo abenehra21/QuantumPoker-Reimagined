@@ -6,7 +6,7 @@
  * with storage disabled gets a perfectly playable in-memory profile and one
  * quiet note in the console, never a crash.
  */
-import { ACHIEVEMENTS, check as checkAchievements } from './achievements.js';
+import { check as checkAchievements } from './achievements.js';
 import { today } from '../utils/rng.js';
 
 const KEY = 'qpr.profile.v1';

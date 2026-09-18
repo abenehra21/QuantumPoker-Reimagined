@@ -8,9 +8,9 @@
 import { h, clear } from '../dom.js';
 import { icon } from '../../render/art.js';
 import { wireTerms } from '../tooltip.js';
-import { CODEX, CODEX_SECTIONS, runDemo } from '../../tutorial/codex.js';
+import { CODEX, CODEX_SECTIONS } from '../../tutorial/codex.js';
 import { BlochSphere } from '../../render/bloch.js';
-import { readCoin, scoreDistribution, entropy, findLinks } from '../../quantum/read.js';
+import { readCoin, entropy, findLinks } from '../../quantum/read.js';
 import { QState } from '../../quantum/state.js';
 import { update } from '../../save/store.js';
 import { SFX } from '../../audio/sfx.js';

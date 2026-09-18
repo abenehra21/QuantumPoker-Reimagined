@@ -6,7 +6,7 @@
  */
 import { h } from '../dom.js';
 import { MODES, MODE_KEYS, targetFor } from '../../gameplay/modes.js';
-import { describeProfile, PROFILES } from '../../quantum/noise.js';
+import { PROFILES } from '../../quantum/noise.js';
 import { SFX } from '../../audio/sfx.js';
 import { icon } from '../../render/art.js';
 import { seedFrom } from '../../utils/rng.js';
