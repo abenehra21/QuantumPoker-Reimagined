@@ -389,6 +389,22 @@ export class QState {
     return this;
   }
 
+  /**
+   * A cheap 32-bit hash of the amplitudes, for the planner's transposition
+   * table. Collisions cost one duplicated branch, never a wrong answer, so
+   * this is worth an order of magnitude over building a string key.
+   */
+  hash() {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < this.size; i++) {
+      h ^= (this.re[i] * 4096) | 0;
+      h = Math.imul(h, 0x01000193);
+      h ^= (this.im[i] * 4096) | 0;
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+  }
+
   /** A stable key for caching: the amplitudes rounded to 6 places. */
   key() {
     let s = '';
