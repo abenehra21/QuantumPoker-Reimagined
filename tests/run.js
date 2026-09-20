@@ -25,6 +25,7 @@ import { ACHIEVEMENTS, check as checkAch } from '../src/save/achievements.js';
 import { blankProfile } from '../src/save/store.js';
 import { mulberry32, mix, shuffle } from '../src/utils/rng.js';
 import { LESSONS } from '../src/tutorial/lessons.js';
+import { run as runHalloween } from './halloween.js';
 import { CODEX } from '../src/tutorial/codex.js';
 
 /** Every ordered tuple of `k` distinct coins out of `n`. */
@@ -802,6 +803,9 @@ section('teaching');
   ok('every codex entry has a body and a demo',
     CODEX.every((c) => c.title && c.body && c.body.length > 120));
 }
+
+/* ================= the Halloween mode ================= */
+runHalloween(ok, near, section);
 
 /* ================= report ================= */
 const failed = results.filter((r) => !r.pass);

@@ -63,7 +63,7 @@ for (const f of jsFiles) {
   const src = readFileSync(f, 'utf8');
   const imports = Array.from(src.matchAll(/from\s+['"]([^'"]+)['"]/g)).map((m) => m[1]);
   // The engine must stay runnable in Node: no UI, no DOM modules.
-  if (/^src\/(quantum|gameplay|ai|save|tutorial|utils)\//.test(rel)) {
+  if (/^src\/(quantum|gameplay|ai|save|tutorial|utils|halloween)\//.test(rel)) {
     for (const i of imports) {
       if (/\/ui\/|\/render\/|\/effects\/|\/audio\//.test(i)) {
         fail(`${rel} reaches into the presentation layer (${i})`);
