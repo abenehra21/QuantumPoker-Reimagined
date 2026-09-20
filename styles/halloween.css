@@ -1,0 +1,768 @@
+/*
+ * halloween.css — Quantum Trick or Treat.
+ *
+ * A haunted casino: candle-warm oranges over cold purple, fog at the floor,
+ * and everything lit from underneath like a jack-o'-lantern. Spooky party
+ * rather than horror — nothing jumps out, nothing is actually frightening,
+ * and the whole thing should read as an invitation rather than a warning.
+ *
+ * Scoped under [data-theme="spooky"] so it cannot leak into the main game.
+ */
+
+[data-theme="spooky"] {
+  --pumpkin:    #ff8b2c;
+  --pumpkin-hi: #ffb35c;
+  --ember:      #ff5a1f;
+  --witch:      #a855f7;
+  --witch-hi:   #c98bff;
+  --slime:      #86efac;
+  --blood:      #e11d48;
+  --moon:       #f8e7c0;
+  --bone:       #ece4d2;
+  --grave:      #1a1424;
+  --crypt:      #120d1c;
+  --tomb:       #0b0712;
+
+  --accent:   var(--pumpkin);
+  --accent-2: var(--witch);
+  --bg:       var(--tomb);
+  --ink:      #f6ecdd;
+  --ink-soft: #cdbfae;
+  --ink-mute: #9a8b7d;
+  --ink-faint:#6b5f56;
+  --line:        rgba(255, 139, 44, .18);
+  --line-strong: rgba(255, 139, 44, .42);
+  --surface:       rgba(38, 24, 52, .66);
+  --surface-solid: #191024;
+
+  --glass:        linear-gradient(160deg, rgba(120, 70, 160, .16), rgba(60, 30, 20, .1));
+  --glass-strong: linear-gradient(160deg, rgba(150, 90, 190, .24), rgba(90, 45, 25, .14));
+
+  --felt-a: #2a1230;
+  --felt-b: #0a0610;
+}
+
+/* The page itself: candlelight from the bottom, moonlight from the top. */
+[data-theme="spooky"] body {
+  background:
+    radial-gradient(120% 80% at 50% 108%, rgba(255, 139, 44, .16), transparent 62%),
+    radial-gradient(100% 70% at 50% -12%, rgba(168, 85, 247, .18), transparent 60%),
+    radial-gradient(70% 50% at 12% 30%, rgba(134, 239, 172, .05), transparent 60%),
+    var(--tomb);
+}
+
+/* The one Halloween thing allowed outside the theme: the menu entry, so it
+   is visibly a different kind of evening before you click it. */
+.menu-spooky {
+  border-color: rgba(255, 139, 44, .45) !important;
+  background: linear-gradient(140deg, rgba(255, 139, 44, .14), rgba(168, 85, 247, .1)) !important;
+}
+.menu-spooky:hover {
+  border-color: #ff8b2c !important;
+  box-shadow: 0 0 26px rgba(255, 139, 44, .45) !important;
+}
+
+/* ====================== fog ====================== */
+
+.fog {
+  position: fixed; inset: auto 0 0 0;
+  height: 42vh; z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fog i {
+  position: absolute; bottom: -30%;
+  width: 60vw; height: 60vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(190, 160, 220, .09), transparent 66%);
+  animation: drift var(--dur, 40s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+}
+@keyframes drift {
+  from { transform: translateX(-70vw) scale(1); }
+  to   { transform: translateX(130vw) scale(1.25); }
+}
+[data-motion="none"] .fog i { animation: none; opacity: .5; }
+
+/* A vignette with a slight flicker, like the room is candle-lit. */
+.candlelight {
+  position: fixed; inset: 0; z-index: 3;
+  pointer-events: none;
+  box-shadow: inset 0 0 220px rgba(0, 0, 0, .85);
+  animation: flicker 7s ease-in-out infinite;
+}
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  47%      { opacity: .92; }
+  52%      { opacity: 1; }
+  71%      { opacity: .95; }
+}
+[data-motion="none"] .candlelight { animation: none; }
+
+/* ====================== the intro ====================== */
+
+.spooky-intro {
+  align-items: center; justify-content: center;
+  text-align: center; gap: var(--s5);
+  padding: var(--s6) var(--s5);
+  position: relative; z-index: 6;
+}
+
+.spooky-title {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 8.5vw, 94px);
+  font-weight: 700; line-height: .95;
+  letter-spacing: -.01em;
+  background: linear-gradient(170deg, var(--pumpkin-hi) 0%, var(--pumpkin) 42%, var(--ember) 68%, var(--witch) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  filter: drop-shadow(0 0 30px rgba(255, 139, 44, .45));
+}
+.spooky-title .pumpkin-emoji {
+  -webkit-text-fill-color: initial; color: initial;
+  filter: drop-shadow(0 0 20px rgba(255, 139, 44, .6));
+  display: inline-block;
+  animation: bob 3.4s ease-in-out infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-8px) rotate(4deg); }
+}
+[data-motion="none"] .spooky-title .pumpkin-emoji { animation: none; }
+
+.spooky-pitch {
+  font-size: var(--fs-lg);
+  color: var(--ink-soft);
+  line-height: 1.7;
+  max-width: 30ch;
+}
+.spooky-pitch b { color: var(--pumpkin); font-weight: 600; }
+
+.bat {
+  position: fixed; z-index: 4;
+  font-size: 22px;
+  pointer-events: none;
+  animation: flap var(--dur, 14s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  opacity: .7;
+}
+@keyframes flap {
+  0%   { transform: translate(-10vw, 40vh) scale(.6) rotate(-8deg); opacity: 0; }
+  10%  { opacity: .7; }
+  50%  { transform: translate(50vw, 18vh) scale(1) rotate(6deg); }
+  90%  { opacity: .7; }
+  100% { transform: translate(112vw, 44vh) scale(.6) rotate(-6deg); opacity: 0; }
+}
+[data-motion="none"] .bat { display: none; }
+
+/* ====================== playing cards ====================== */
+
+.pcard {
+  position: relative;
+  width: var(--card-w, 92px);
+  height: calc(var(--card-w, 92px) * 1.42);
+  flex: none;
+  border-radius: 9px;
+  background: linear-gradient(168deg, #fbf5e8, #e6dcc6);
+  color: #1a1018;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(0, 0, 0, .12);
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 6px 7px;
+  user-select: none;
+  transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease),
+              filter var(--t-base) var(--ease);
+  will-change: transform;
+}
+/* Strong ink. A card read at arm's length across a table in a dim room has
+   to work at a glance, so the two colours are pushed well apart and both
+   are dark enough to hold their shape against the cream. */
+.pcard.warm { color: #d61f4e; }
+.pcard.dark { color: #141018; }
+
+.pcard-corner {
+  display: flex; flex-direction: column; align-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: .92;
+  font-size: calc(var(--card-w, 92px) * 0.28);
+  letter-spacing: -.02em;
+}
+.pcard-corner .pip {
+  font-size: calc(var(--card-w, 92px) * 0.24);
+  line-height: 1;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.pcard-corner.flip { transform: rotate(180deg); align-self: flex-end; }
+
+.pcard-centre {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: calc(var(--card-w, 92px) * 0.52);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .3));
+  pointer-events: none;
+}
+/* Below about fifty pixels the emoji stops being legible, so it steps
+   aside and lets the rank carry the card. */
+.pcard[style*="--card-w: 34"] .pcard-centre,
+.pcard[style*="--card-w: 26"] .pcard-centre { font-size: calc(var(--card-w) * 0.44); opacity: .85; }
+
+/* The back: a cobweb-and-moon pattern, not a plain rectangle. */
+.pcard.back {
+  background:
+    /* a cobweb: radial threads plus two arcs, not a starburst */
+    repeating-conic-gradient(from 0deg at 50% 42%, rgba(236, 228, 210, .07) 0deg .6deg, transparent .6deg 30deg),
+    radial-gradient(circle at 50% 42%, transparent 14%, rgba(236, 228, 210, .05) 14.5%, transparent 15.5%,
+      transparent 26%, rgba(236, 228, 210, .05) 26.5%, transparent 27.5%,
+      transparent 40%, rgba(236, 228, 210, .04) 40.5%, transparent 41.5%),
+    radial-gradient(circle at 50% 42%, rgba(168, 85, 247, .2), transparent 62%),
+    linear-gradient(160deg, #241536, #120b1c);
+  color: var(--moon);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(168, 85, 247, .26);
+}
+.pcard.back .pcard-centre {
+  font-size: calc(var(--card-w, 92px) * 0.3);
+  opacity: .5;
+  align-items: flex-end; padding-bottom: 8%;
+}
+
+/* A haunted card: still a "?", visibly undecided, with both ghosts behind it. */
+.pcard.haunted {
+  background: linear-gradient(165deg, #2a1840, #150c22);
+  color: var(--witch-hi);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .6),
+              inset 0 0 0 1px rgba(201, 139, 255, .5),
+              0 0 26px rgba(168, 85, 247, .38);
+  animation: haunt-pulse 2.6s ease-in-out infinite;
+}
+@keyframes haunt-pulse {
+  0%, 100% { box-shadow: 0 6px 22px rgba(0,0,0,.6), inset 0 0 0 1px rgba(201,139,255,.5), 0 0 22px rgba(168,85,247,.32); }
+  50%      { box-shadow: 0 6px 22px rgba(0,0,0,.6), inset 0 0 0 1px rgba(201,139,255,.8), 0 0 40px rgba(168,85,247,.6); }
+}
+[data-motion="none"] .pcard.haunted { animation: none; }
+
+.pcard-mark {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-family: var(--font-display);
+  font-size: calc(var(--card-w, 92px) * 0.62);
+  font-weight: 700;
+  color: var(--witch-hi);
+  text-shadow: 0 0 22px rgba(168, 85, 247, .9);
+}
+
+/* The two possibilities, drifting behind the "?" like afterimages. */
+.pcard-ghosts {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; justify-content: center; gap: 4px;
+  padding-bottom: 6px;
+  font-size: calc(var(--card-w, 92px) * 0.17);
+  color: rgba(236, 228, 210, .62);
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+.pcard-ghosts span { animation: ghost-drift 3s ease-in-out infinite; }
+.pcard-ghosts span:last-child { animation-delay: 1.5s; }
+@keyframes ghost-drift {
+  0%, 100% { opacity: .35; transform: translateY(0); }
+  50%      { opacity: .9;  transform: translateY(-3px); }
+}
+[data-motion="none"] .pcard-ghosts span { animation: none; opacity: .7; }
+
+/* Collapse: the card shakes, splits into two ghosts, and picks one. */
+.pcard.collapsing { animation: collapse-shake 620ms var(--ease-out); }
+@keyframes collapse-shake {
+  0%   { transform: translateX(0) scale(1); filter: blur(0); }
+  12%  { transform: translateX(-5px) scale(1.03); }
+  24%  { transform: translateX(5px)  scale(1.03); filter: blur(1px); }
+  36%  { transform: translateX(-6px) scale(1.06); }
+  48%  { transform: translateX(6px)  scale(1.06); filter: blur(2px) brightness(1.7); }
+  62%  { transform: translateX(-3px) scale(1.1);  filter: blur(3px) brightness(2.4); }
+  78%  { transform: scale(1.14); filter: blur(0) brightness(1.4); }
+  100% { transform: scale(1); filter: none; }
+}
+.pcard.dealt { animation: card-fly 560ms var(--ease-out) backwards; }
+@keyframes card-fly {
+  from { transform: translate(var(--fx, 0), var(--fy, -240px)) rotate(var(--fr, -20deg)) scale(.7); opacity: 0; }
+}
+.pcard.swapping { animation: card-swap 560ms var(--ease-out); }
+@keyframes card-swap {
+  0%   { transform: rotateY(0) scale(1); }
+  45%  { transform: rotateY(90deg) scale(1.1); filter: brightness(1.8); }
+  55%  { transform: rotateY(90deg) scale(1.1); filter: brightness(1.8); }
+  100% { transform: rotateY(0) scale(1); }
+}
+.pcard.playing { box-shadow: 0 0 0 2px var(--slime), 0 8px 28px rgba(0,0,0,.6), 0 0 34px rgba(134,239,172,.5); }
+.pcard.dimmed { filter: grayscale(.7) brightness(.55); }
+
+/* A card waiting to be picked has to shout. The prompt alone is not enough
+   in a room with other people talking: the thing you are meant to tap must
+   be the brightest object on the table. */
+.pcard.pickable {
+  cursor: pointer;
+  animation: beckon 1.1s ease-in-out infinite;
+}
+@keyframes beckon {
+  0%, 100% { box-shadow: 0 6px 18px rgba(0,0,0,.55), 0 0 0 2px rgba(255,139,44,.55), 0 0 18px rgba(255,139,44,.35); }
+  50%      { box-shadow: 0 6px 18px rgba(0,0,0,.55), 0 0 0 3px rgba(255,139,44,1),   0 0 34px rgba(255,139,44,.8); transform: translateY(-5px); }
+}
+[data-motion="none"] .pcard.pickable {
+  animation: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,.55), 0 0 0 3px var(--pumpkin);
+}
+.pcard.pickable:hover, .pcard.pickable:focus-visible {
+  animation: none;
+  transform: translateY(-12px) scale(1.06);
+  box-shadow: 0 14px 34px rgba(0,0,0,.6), 0 0 0 3px var(--pumpkin), 0 0 36px rgba(255,139,44,.8);
+}
+.pcard.chosen { transform: translateY(-14px) scale(1.06); box-shadow: 0 0 0 2px var(--pumpkin), 0 14px 34px rgba(0,0,0,.6); }
+
+/* A link between two entangled cards. */
+.tangle-layer { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 4; }
+.tangle {
+  fill: none; stroke: var(--witch-hi); stroke-width: 2.5; stroke-linecap: round;
+  filter: drop-shadow(0 0 8px var(--witch));
+  stroke-dasharray: 7 8;
+  animation: tangle-flow 1.2s linear infinite;
+}
+@keyframes tangle-flow { to { stroke-dashoffset: -30; } }
+[data-motion="none"] .tangle { animation: none; }
+
+/* ====================== candy ====================== */
+
+.candy-stack {
+  display: flex; align-items: center; gap: 1px;
+  flex-wrap: wrap; max-width: 150px;
+  line-height: 1;
+}
+.candy-stack i {
+  font-style: normal;
+  font-size: calc(13px * var(--sz, 1));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
+  animation: candy-in 340ms var(--ease-back) backwards;
+  animation-delay: calc(var(--i, 0) * 28ms);
+}
+@keyframes candy-in { from { transform: scale(0) rotate(-90deg); opacity: 0; } }
+[data-motion="none"] .candy-stack i { animation: none; }
+
+.candy-count {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--pumpkin);
+  font-weight: 700;
+}
+.candy-count.big { font-size: var(--fs-xl); text-shadow: 0 0 20px rgba(255,139,44,.55); }
+.candy-count.bumping { animation: candy-bump 460ms var(--ease-back); }
+@keyframes candy-bump {
+  0% { transform: scale(1); } 40% { transform: scale(1.22); } 100% { transform: scale(1); }
+}
+
+.candy-fly {
+  position: fixed; z-index: 70; pointer-events: none;
+  font-size: 18px;
+  will-change: transform;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.7));
+}
+
+/* ====================== the table ====================== */
+
+.spooky-table { display: grid; grid-template-rows: auto 1fr auto; height: 100%; min-height: 0; }
+
+.spooky-top {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(10,6,16,.9), transparent);
+  position: relative; z-index: 6;
+  flex-wrap: wrap;
+}
+
+.spooky-felt {
+  position: relative; z-index: 5;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  gap: clamp(var(--s3), 2.4vh, var(--s5));
+  padding: clamp(var(--s3), 2.4vh, var(--s5)) var(--s4);
+  min-height: 0;
+  background:
+    radial-gradient(ellipse 78% 68% at 50% 46%, var(--felt-a), var(--felt-b) 76%);
+  overflow: hidden;
+}
+.spooky-felt::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px);
+}
+/* Cobwebs in the corners. */
+.spooky-felt::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(236,228,210,.06) 0 1px, transparent 1px) 0 0 / 22px 22px,
+    radial-gradient(circle at 100% 0%, rgba(236,228,210,.05) 0 1px, transparent 1px) 0 0 / 26px 26px;
+  mask-image: radial-gradient(circle at 0% 0%, #000 22%, transparent 42%),
+              radial-gradient(circle at 100% 0%, #000 22%, transparent 42%);
+  -webkit-mask-composite: source-over;
+  box-shadow: inset 0 0 150px rgba(0,0,0,.7);
+}
+
+.community {
+  display: flex; gap: clamp(6px, 1.4vw, 14px);
+  align-items: center; justify-content: center;
+  position: relative; z-index: 3;
+  padding: var(--s3) 0;
+}
+.community .pcard { --card-w: clamp(52px, 7vw, 86px); }
+
+.pot-pile {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  position: relative; z-index: 3;
+}
+.pot-pile .candy-stack { --sz: 1.6; max-width: 230px; justify-content: center; }
+.pot-pile .label {
+  font-family: var(--font-display); font-size: var(--fs-xs);
+  letter-spacing: .22em; text-transform: uppercase; color: var(--ink-mute);
+}
+
+.felt-lanterns {
+  position: absolute; inset: 0; pointer-events: none;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(8px, 4vw, 70px);
+  font-size: clamp(24px, 4vw, 44px);
+  opacity: .22;
+}
+.felt-lanterns span { animation: lantern 4.6s ease-in-out infinite; filter: drop-shadow(0 0 18px rgba(255,139,44,.8)); }
+.felt-lanterns span:nth-child(2) { animation-delay: -2.3s; }
+@keyframes lantern {
+  0%, 100% { opacity: .5; transform: translateY(0) scale(1); }
+  50%      { opacity: 1;  transform: translateY(-6px) scale(1.06); }
+}
+[data-motion="none"] .felt-lanterns span { animation: none; }
+
+/* ====================== seats ====================== */
+
+.crypt-seats {
+  display: flex; gap: var(--s3); flex-wrap: wrap; justify-content: center;
+  position: relative; z-index: 6;
+  width: 100%;
+}
+
+.crypt-seat {
+  position: relative;
+  display: flex; gap: var(--s2); align-items: flex-start;
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-md);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  min-width: 168px;
+  transition: border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease), opacity var(--t-base) var(--ease);
+}
+.crypt-seat.acting {
+  border-color: var(--pumpkin);
+  box-shadow: 0 0 26px rgba(255, 139, 44, .4);
+  transform: translateY(-3px);
+}
+.crypt-seat.folded { opacity: .35; filter: grayscale(.7); }
+.crypt-seat.winner {
+  border-color: var(--slime);
+  box-shadow: 0 0 40px rgba(134, 239, 172, .5);
+}
+.crypt-seat.hero { border-color: var(--line-strong); }
+
+.crypt-face {
+  width: 40px; height: 40px; flex: none;
+  border-radius: var(--r-sm);
+  display: grid; place-items: center;
+  font-size: 22px;
+  background: radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--who, var(--pumpkin)) 34%, transparent), transparent 70%), rgba(10,6,18,.8);
+  border: 1px solid color-mix(in srgb, var(--who, var(--pumpkin)) 45%, transparent);
+}
+.crypt-face.thinking { animation: think 1.1s ease-in-out infinite; }
+@keyframes think { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.55); } }
+[data-motion="none"] .crypt-face.thinking { animation: none; }
+
+.crypt-name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-sm); }
+.crypt-line { font-size: var(--fs-xs); color: var(--ink-mute); }
+.crypt-cards { display: flex; gap: 3px; margin-top: 4px; }
+.crypt-cards .pcard { --card-w: 42px; }
+
+.crypt-say {
+  position: absolute; bottom: calc(100% + 8px); left: var(--s3);
+  max-width: 220px;
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-md);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--sh-3);
+  font-size: var(--fs-sm);
+  animation: say-in 260ms var(--ease-back);
+  z-index: 9;
+}
+.crypt-say::after {
+  content: ''; position: absolute; top: 100%; left: 18px;
+  border: 6px solid transparent; border-top-color: var(--surface-solid);
+}
+@keyframes say-in { from { opacity: 0; transform: translateY(6px) scale(.92); } }
+
+/* ====================== your area ====================== */
+
+.spooky-bottom {
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: var(--s4); align-items: end;
+  padding: var(--s3) var(--s4) var(--s4);
+  border-top: 1px solid var(--line);
+  background: linear-gradient(0deg, rgba(10,6,16,.94), transparent);
+  position: relative; z-index: 6;
+}
+
+.your-hand { display: flex; gap: var(--s2); align-items: flex-end; margin-top: 18px; }
+.your-hand .pcard { --card-w: clamp(64px, 8vw, 96px); }
+.your-hand .slot { position: relative; }
+.your-hand .slot .tag {
+  position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-faint); white-space: nowrap;
+  padding: 1px 6px; border-radius: var(--r-pill);
+  background: rgba(10, 6, 18, .8);
+}
+.your-hand .slot.up .tag {
+  color: var(--pumpkin);
+  border: 1px solid rgba(255, 139, 44, .3);
+}
+.your-hand .slot.up .tag { color: var(--pumpkin); }
+
+.bet-controls { display: flex; flex-direction: column; gap: var(--s2); min-width: 250px; }
+.bet-row { display: flex; gap: var(--s2); }
+.bet-row .btn { flex: 1; white-space: nowrap; padding-left: var(--s2); padding-right: var(--s2); }
+.bet-row .btn .amt { font-family: var(--font-mono); opacity: .9; }
+
+/* Big, obvious, thumb-sized buttons. This is a party, not a spreadsheet. */
+.spooky-table .btn {
+  font-size: var(--fs-md);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+}
+.btn-fold { border-color: rgba(225, 29, 72, .5); }
+.btn-fold:hover { border-color: var(--blood); box-shadow: 0 0 22px rgba(225,29,72,.4); }
+.btn-call { border-color: rgba(255, 139, 44, .5); }
+.btn-call:hover { border-color: var(--pumpkin); box-shadow: 0 0 22px rgba(255,139,44,.45); }
+.btn-raise {
+  border-color: var(--pumpkin);
+  background: linear-gradient(140deg, rgba(255,139,44,.26), rgba(168,85,247,.2));
+  box-shadow: 0 0 20px rgba(255,139,44,.3);
+}
+.btn-allin {
+  border-color: var(--blood);
+  background: linear-gradient(140deg, rgba(225,29,72,.3), rgba(255,90,31,.2));
+}
+
+.power-bar { display: flex; gap: var(--s2); align-items: flex-end; }
+.power-btn {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 74px; padding: var(--s2) 4px;
+  border-radius: var(--r-md);
+  border: 1px solid color-mix(in srgb, var(--tone, var(--witch)) 45%, transparent);
+  background: var(--glass);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease-back), box-shadow var(--t-base) var(--ease),
+              border-color var(--t-base) var(--ease);
+}
+.power-btn .glyph { font-size: 22px; line-height: 1; }
+.power-btn .name { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
+.power-btn .cost { font-size: 9px; color: var(--ink-faint); font-family: var(--font-mono); }
+.power-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  border-color: var(--tone, var(--witch));
+  box-shadow: 0 0 22px color-mix(in srgb, var(--tone, var(--witch)) 40%, transparent);
+}
+.power-btn:disabled { opacity: .32; cursor: not-allowed; }
+.power-btn.armed {
+  border-color: var(--tone, var(--witch));
+  box-shadow: 0 0 26px color-mix(in srgb, var(--tone, var(--witch)) 60%, transparent);
+  transform: translateY(-4px);
+}
+.power-btn.fresh { animation: power-arrive 1.6s var(--ease-out) 2; }
+@keyframes power-arrive {
+  0%, 100% { box-shadow: 0 0 0 rgba(255,139,44,0); }
+  50%      { box-shadow: 0 0 30px rgba(255,139,44,.8); }
+}
+
+.charges { display: flex; gap: 3px; justify-content: center; }
+.charges i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink-faint); display: block;
+}
+.charges i.on { background: var(--witch-hi); box-shadow: 0 0 6px var(--witch-hi); }
+
+/* The targeting prompt. Big, coloured, and directly above the cards it is
+   talking about. */
+.arming {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-pill);
+  background: rgba(16, 9, 26, .95);
+  border: 1px solid var(--tone, var(--pumpkin));
+  box-shadow: 0 0 26px color-mix(in srgb, var(--tone, var(--pumpkin)) 45%, transparent);
+  font-size: var(--fs-md);
+  animation: say-in 220ms var(--ease-back);
+}
+.arming .glyph { font-size: 20px; }
+.arming .esc {
+  font-size: var(--fs-xs); color: var(--ink-faint);
+  border: 1px solid var(--line); border-radius: var(--r-xs); padding: 0 5px;
+}
+
+/* ====================== events ====================== */
+
+.collapse-banner {
+  position: fixed; inset: 0; z-index: 95;
+  display: grid; place-items: center;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(168,85,247,.24), rgba(6,3,12,.72));
+  animation: banner 2.4s var(--ease-out) forwards;
+}
+.collapse-banner .inner { text-align: center; padding: var(--s5); }
+.collapse-banner .title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 6vw, 62px);
+  font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--witch-hi);
+  text-shadow: 0 0 44px rgba(168,85,247,.9);
+}
+.collapse-banner .sub { color: var(--ink); font-size: var(--fs-lg); margin-top: var(--s2); max-width: 30ch; }
+@keyframes banner {
+  0%   { opacity: 0; backdrop-filter: blur(0); }
+  14%  { opacity: 1; backdrop-filter: blur(4px); }
+  78%  { opacity: 1; backdrop-filter: blur(4px); }
+  100% { opacity: 0; backdrop-filter: blur(0); }
+}
+
+.shout {
+  position: fixed; left: 50%; top: 34%; z-index: 96;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(30px, 6.5vw, 74px);
+  font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  white-space: nowrap; pointer-events: none;
+  color: var(--pumpkin);
+  text-shadow: 0 0 42px rgba(255,139,44,.9);
+  animation: shout-in 1900ms var(--ease-out) forwards;
+}
+.shout.win  { color: var(--slime); text-shadow: 0 0 46px rgba(134,239,172,.9); }
+.shout.lose { color: var(--blood); text-shadow: 0 0 46px rgba(225,29,72,.8); }
+.shout.epic { color: var(--moon); text-shadow: 0 0 60px rgba(255,200,80,1); }
+@keyframes shout-in {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.6) rotate(-3deg); filter: blur(12px); }
+  16%  { opacity: 1; transform: translate(-50%,-50%) scale(1.06) rotate(1deg); filter: blur(0); }
+  74%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-58%) scale(1.02); filter: blur(5px); }
+}
+
+.new-power {
+  position: fixed; left: 50%; top: 22%; z-index: 96;
+  transform: translateX(-50%);
+  padding: var(--s3) var(--s5);
+  border-radius: var(--r-pill);
+  background: rgba(20, 12, 30, .96);
+  border: 1px solid var(--pumpkin);
+  box-shadow: 0 0 40px rgba(255,139,44,.5);
+  display: flex; align-items: center; gap: var(--s3);
+  animation: shout-in 3400ms var(--ease-out) forwards;
+  pointer-events: none;
+}
+.new-power .glyph { font-size: 26px; }
+.new-power .what { font-family: var(--font-display); font-weight: 700; color: var(--pumpkin); }
+.new-power .how { font-size: var(--fs-sm); color: var(--ink-soft); }
+
+/* ====================== the 30 second tutorial ====================== */
+
+.quick-steps { display: flex; flex-direction: column; gap: var(--s3); width: min(520px, 92vw); }
+.quick-step {
+  display: flex; align-items: center; gap: var(--s4);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  text-align: left;
+  animation: step-in 420ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+@keyframes step-in { from { opacity: 0; transform: translateX(-16px); } }
+.quick-step .num {
+  width: 34px; height: 34px; flex: none;
+  border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 700;
+  background: color-mix(in srgb, var(--pumpkin) 18%, transparent);
+  border: 1px solid var(--pumpkin); color: var(--pumpkin);
+}
+.quick-step .what { font-size: var(--fs-md); }
+.quick-step .why { font-size: var(--fs-xs); color: var(--ink-mute); }
+
+/* ====================== end of night ====================== */
+
+.scoreboard { padding: var(--s6) var(--s5); overflow-y: auto; gap: var(--s5); position: relative; z-index: 6; }
+.score-row {
+  display: grid; grid-template-columns: 40px 1fr auto minmax(96px, auto);
+  gap: var(--s3); align-items: center;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: var(--glass); border: 1px solid var(--line);
+  animation: step-in 420ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.score-row.first {
+  border-color: var(--pumpkin);
+  box-shadow: 0 0 34px rgba(255,139,44,.35);
+  background: linear-gradient(120deg, rgba(255,139,44,.12), transparent);
+}
+.score-row .place { font-family: var(--font-display); font-size: var(--fs-lg); color: var(--ink-faint); text-align: center; }
+.score-row.first .place { color: var(--pumpkin); }
+.score-row .award { font-size: var(--fs-xs); color: var(--witch-hi); }
+.score-row .award-line { font-size: var(--fs-xs); color: var(--ink-mute); }
+.score-row .tally { font-size: var(--fs-xs); color: var(--ink-faint); text-align: right; white-space: nowrap; line-height: 1.5; }
+
+/* ====================== party mode ====================== */
+
+.pass-screen {
+  position: fixed; inset: 0; z-index: 98;
+  display: grid; place-items: center;
+  background: rgba(6, 3, 12, .97);
+  backdrop-filter: blur(20px);
+  text-align: center;
+}
+.pass-screen .who {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 8vw, 78px);
+  color: var(--pumpkin);
+  text-shadow: 0 0 40px rgba(255,139,44,.6);
+}
+.pass-screen .hint { color: var(--ink-mute); margin-top: var(--s3); }
+
+/* ====================== responsive ====================== */
+
+@media (max-width: 860px) {
+  .spooky-bottom { grid-template-columns: 1fr; gap: var(--s2); padding: var(--s2) var(--s3) var(--s3); }
+  .your-hand { justify-content: center; }
+  .power-bar { justify-content: center; flex-wrap: wrap; }
+  .power-btn { width: 64px; }
+  .bet-controls { min-width: 0; }
+  .crypt-seats { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: var(--s2); scrollbar-width: none; }
+  .crypt-seats::-webkit-scrollbar { display: none; }
+  .crypt-seat { min-width: 132px; flex: none; padding: var(--s2); }
+  .crypt-seat .crypt-face { width: 32px; height: 32px; font-size: 18px; }
+  .crypt-cards .pcard { --card-w: 34px; }
+  .community .pcard { --card-w: clamp(44px, 13vw, 64px); }
+  .your-hand .pcard { --card-w: clamp(58px, 17vw, 80px); }
+  .score-row { grid-template-columns: 32px 1fr auto; }
+}
+
+@media (max-width: 460px) {
+  .community { gap: 4px; }
+  .community .pcard { --card-w: 40px; }
+  .power-btn { width: 56px; }
+  .power-btn .name { font-size: 9px; }
+}

@@ -21,6 +21,9 @@ import * as codex from './ui/screens/codex.js';
 import * as stats from './ui/screens/stats.js';
 import * as settings from './ui/screens/settings.js';
 import * as credits from './ui/screens/credits.js';
+import * as spookyIntro from './ui/screens/spooky-intro.js';
+import * as spooky from './ui/screens/spooky.js';
+import * as spookyResults from './ui/screens/spooky-results.js';
 
 const app = new App({
   bg: $('#bg-canvas'),
@@ -40,7 +43,10 @@ app.router
   .register('codex', codex)
   .register('stats', stats)
   .register('settings', settings)
-  .register('credits', credits);
+  .register('credits', credits)
+  .register('spooky-intro', spookyIntro)
+  .register('spooky', spooky)
+  .register('spooky-results', spookyResults);
 
 /* ---- global keys ---------------------------------------------------- */
 
@@ -117,7 +123,13 @@ if (params.has('test')) {
     });
   });
 }
-if (params.has('seed') || params.has('mode')) {
+if (params.get('mode') === 'spooky') {
+  app.router.go('spooky', {
+    seed: params.get('seed') || undefined,
+    length: params.get('length') || undefined,
+    opponents: params.has('bots') ? Number(params.get('bots')) : undefined
+  });
+} else if (params.has('seed') || params.has('mode')) {
   app.router.go('table', {
     mode: params.get('mode') || 'student',
     seed: params.get('seed') ? Number(params.get('seed')) >>> 0 : undefined

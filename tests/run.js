@@ -26,6 +26,7 @@ import { blankProfile } from '../src/save/store.js';
 import { mulberry32, mix, shuffle } from '../src/utils/rng.js';
 import { LESSONS } from '../src/tutorial/lessons.js';
 import { run as runHalloween } from './halloween.js';
+import { h as domH } from '../src/ui/dom.js';
 import { CODEX } from '../src/tutorial/codex.js';
 
 /** Every ordered tuple of `k` distinct coins out of `n`. */
@@ -802,6 +803,23 @@ section('teaching');
   ok('the codex covers the syllabus', CODEX.length >= 12, CODEX.length);
   ok('every codex entry has a body and a demo',
     CODEX.every((c) => c.title && c.body && c.body.length > 120));
+}
+
+/* ================= the DOM helper ================= */
+section('dom helper');
+{
+  // Only runnable in a browser; skipped in Node, where the rest of the
+  // suite lives. It is here because this exact bug shipped: custom
+  // properties assigned through Object.assign are silently dropped, so
+  // every themed element quietly fell back to its default colour.
+  if (typeof document !== 'undefined') {
+    const el = domH('div', { style: { '--tone': 'red', color: 'blue', '--card-w': '26px' } });
+    ok('h() sets custom properties', el.style.getPropertyValue('--tone') === 'red');
+    ok('h() still sets normal properties', el.style.color === 'blue');
+    ok('h() handles several custom properties', el.style.getPropertyValue('--card-w') === '26px');
+  } else {
+    ok('dom helper checks run in the browser', true, 'skipped in Node');
+  }
 }
 
 /* ================= the Halloween mode ================= */

@@ -63,7 +63,15 @@ for (const f of jsFiles) {
   const src = readFileSync(f, 'utf8');
   const imports = Array.from(src.matchAll(/from\s+['"]([^'"]+)['"]/g)).map((m) => m[1]);
   // The engine must stay runnable in Node: no UI, no DOM modules.
-  if (/^src\/(quantum|gameplay|ai|save|tutorial|utils|halloween)\//.test(rel)) {
+  //
+  // Trick or Treat keeps its own presentation inside its module rather than
+  // scattering Halloween code through src/ui, so its `ui/` folder and its
+  // sound set are the two deliberate exceptions. Everything else under
+  // src/halloween/ is rules, and the rules stay headless — which is what
+  // lets the tests play thousands of nights without a browser.
+  const headless = /^src\/(quantum|gameplay|ai|save|tutorial|utils)\//.test(rel)
+    || (/^src\/halloween\//.test(rel) && !/^src\/halloween\/(ui\/|sounds\.js)/.test(rel));
+  if (headless) {
     for (const i of imports) {
       if (/\/ui\/|\/render\/|\/effects\/|\/audio\//.test(i)) {
         fail(`${rel} reaches into the presentation layer (${i})`);
@@ -110,7 +118,9 @@ const defined = new Set(Array.from(css.matchAll(/(?:^|[;{\s])(--[\w-]+)\s*:/gm))
 // Variables the UI sets from JavaScript at runtime.
 for (const v of ['--rarity', '--tone', '--seat-accent', '--mode-accent', '--tier-color', '--val',
                  '--pct', '--spin-time', '--ent', '--from-x', '--from-y', '--from-r', '--shimmer',
-                 '--orb-size', '--ripple-color', '--ripple-size', '--rad', '--dur', '--delay']) defined.add(v);
+                 '--orb-size', '--ripple-color', '--ripple-size', '--rad', '--dur', '--delay',
+                 // Trick or Treat sets these per element as it animates.
+                 '--fx', '--fy', '--fr', '--sz', '--i', '--who', '--card-w']) defined.add(v);
 const used = new Set(Array.from(css.matchAll(/var\((--[\w-]+)/g)).map((m) => m[1]));
 for (const v of used) if (!defined.has(v)) fail(`css uses ${v}, which nothing defines`);
 console.log(`  ${defined.size} variables defined, ${used.size} used, ${failures - cssBefore} undefined`);

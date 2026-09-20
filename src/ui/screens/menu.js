@@ -44,12 +44,14 @@ export function build(app) {
 
   const item = (label, key, go, opts) => h('button.btn' + (opts && opts.primary ? '.btn-primary' : ''), {
     type: 'button',
+    class: opts && opts.spooky ? 'menu-spooky' : '',
     onclick: () => { SFX.click(); go(); },
     onpointerenter: () => SFX.hover()
   }, [h('span', { text: label }), h('span.key', { text: key })]);
 
   root.appendChild(h('div.menu-actions', [
     item('Play', 'P', () => app.router.push('modes'), { primary: true }),
+    item('\u{1F383} Trick or Treat', 'H', () => app.router.push('spooky-intro'), { spooky: true }),
     item(daily.playedToday ? 'Daily Deal · done' : 'Daily Deal', 'D',
       () => app.router.push('table', { mode: 'daily' })),
     item('Tutorial', 'T', () => app.router.push('tutorial')),
@@ -96,6 +98,7 @@ export function key(e, app) {
   const map = {
     p: () => app.router.push('modes'),
     d: () => app.router.push('table', { mode: 'daily' }),
+    h: () => app.router.push('spooky-intro'),
     t: () => app.router.push('tutorial'),
     b: () => app.router.push('sandbox'),
     e: () => app.router.push('codex'),
