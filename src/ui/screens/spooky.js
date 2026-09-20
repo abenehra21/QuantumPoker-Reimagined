@@ -148,6 +148,8 @@ class SpookyTable {
 
   teardown() {
     if (this.tangleTick) { this.tangleTick(); this.tangleTick = null; }
+    if (this.bubbles) { for (const b of this.bubbles.values()) b.remove(); this.bubbles.clear(); }
+    for (const el of document.querySelectorAll('.pass-screen, .collapse-banner, .shout, .new-power')) el.remove();
     this.app.spooky = null;
   }
 
@@ -572,7 +574,19 @@ class SpookyTable {
 
         if (this.game.phase === 'over') break;
         const p = this.game.current();
-        if (!p || !p.monster) break;
+        if (!p) break;
+        if (!p.monster) {
+          // A human's turn. In party mode it may not be the person currently
+          // looking at the screen, and handing over without a cover screen
+          // would show them somebody else's face-down card and then refuse
+          // their input, because act() only accepts the active player.
+          if (this.match.isPartyMode && p.seat !== this.me().seat) {
+            this.busy = false;
+            this.passTo(p.seat);
+            return;
+          }
+          break;
+        }
 
         await wait(420 + Math.random() * 420);
         const did = monsterStep(this.game);
@@ -849,8 +863,12 @@ class SpookyTable {
     const humans = this.game.humans();
     const idx = humans.findIndex((p) => p.seat === seat);
     if (idx < 0) { this.pump(); return; }
+    if (document.querySelector('.pass-screen')) return;   // already handing over
     this.activeHuman = idx;
     const who = humans[idx];
+    // Blank the table before the screen fades in, so nothing of the previous
+    // player's hand is on display for even a frame.
+    this.disarm();
 
     const screen = h('div.pass-screen', [
       h('div', [
@@ -880,14 +898,23 @@ class SpookyTable {
   speak(seat, text) {
     const el = this.seatEls.get(seat);
     if (!el || !text) return;
-    const old = el.querySelector('.crypt-say');
-    if (old) old.remove();
+    if (this.bubbles && this.bubbles.get(seat)) this.bubbles.get(seat).remove();
+    if (!this.bubbles) this.bubbles = new Map();
+    const r = el.getBoundingClientRect();
     const bubble = h('div.crypt-say', { text });
-    el.appendChild(bubble);
+    document.body.appendChild(bubble);
+    // Place it after it has a size, and keep it on screen at either edge.
+    const b = bubble.getBoundingClientRect();
+    // Keep clear of the header; a bubble over the hand counter is unreadable.
+    const top = document.querySelector('.spooky-top');
+    const floor = top ? top.getBoundingClientRect().bottom + 6 : 8;
+    bubble.style.left = Math.max(8, Math.min(innerWidth - b.width - 8, r.left + 8)) + 'px';
+    bubble.style.top = Math.max(floor, r.top - b.height - 8) + 'px';
+    this.bubbles.set(seat, bubble);
     setTimeout(() => {
       bubble.style.transition = 'opacity 260ms';
       bubble.style.opacity = '0';
-      setTimeout(() => bubble.remove(), 280);
+      setTimeout(() => { bubble.remove(); if (this.bubbles) this.bubbles.delete(seat); }, 280);
     }, 2500);
   }
 

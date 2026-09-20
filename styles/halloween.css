@@ -410,12 +410,16 @@
   align-items: center; justify-content: center;
   position: relative; z-index: 3;
   padding: var(--s3) 0;
+  flex: 1 1 auto; min-height: 0;
 }
 .community .pcard { --card-w: clamp(52px, 7vw, 86px); }
 
 .pot-pile {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   position: relative; z-index: 3;
+  /* The pot is the number everybody is looking at; it never gets squeezed.
+     The community row gives up space first. */
+  flex: 0 0 auto;
 }
 .pot-pile .candy-stack { --sz: 1.6; max-width: 230px; justify-content: center; }
 .pot-pile .label {
@@ -444,6 +448,11 @@
   display: flex; gap: var(--s3); flex-wrap: wrap; justify-content: center;
   position: relative; z-index: 6;
   width: 100%;
+  /* Never let the felt squeeze this row: it is a horizontal scroller on
+     narrow screens, and a scroller clips vertically too (CSS turns a
+     `visible` cross axis into `auto`), so shrinking it hides the cards
+     rather than compressing them. */
+  flex: 0 0 auto;
 }
 
 .crypt-seat {
@@ -488,8 +497,10 @@
 .crypt-cards { display: flex; gap: 3px; margin-top: 4px; }
 .crypt-cards .pcard { --card-w: 42px; }
 
+/* Fixed, not absolute: the seats row becomes a scroll container on narrow
+   screens and would clip a bubble anchored inside it. */
 .crypt-say {
-  position: absolute; bottom: calc(100% + 8px); left: var(--s3);
+  position: fixed;
   max-width: 220px;
   padding: var(--s2) var(--s3);
   border-radius: var(--r-md);
@@ -504,6 +515,7 @@
   content: ''; position: absolute; top: 100%; left: 18px;
   border: 6px solid transparent; border-top-color: var(--surface-solid);
 }
+.crypt-say { z-index: 60; pointer-events: none; }
 @keyframes say-in { from { opacity: 0; transform: translateY(6px) scale(.92); } }
 
 /* ====================== your area ====================== */
@@ -746,11 +758,19 @@
 
 @media (max-width: 860px) {
   .spooky-bottom { grid-template-columns: 1fr; gap: var(--s2); padding: var(--s2) var(--s3) var(--s3); }
+  .spooky-top { flex-wrap: nowrap; padding: var(--s2) var(--s3); gap: var(--s2); }
+  .spooky-top .row.small { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; min-width: 0; }
+  .spooky-top .row.small::-webkit-scrollbar { display: none; }
+  .spooky-top .btn-icon { flex: none; }
   .your-hand { justify-content: center; }
   .power-bar { justify-content: center; flex-wrap: wrap; }
   .power-btn { width: 64px; }
   .bet-controls { min-width: 0; }
-  .crypt-seats { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: var(--s2); scrollbar-width: none; }
+  .crypt-seats {
+    flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
+    padding-bottom: var(--s2); scrollbar-width: none;
+    min-height: 104px; align-items: flex-start;
+  }
   .crypt-seats::-webkit-scrollbar { display: none; }
   .crypt-seat { min-width: 132px; flex: none; padding: var(--s2); }
   .crypt-seat .crypt-face { width: 32px; height: 32px; font-size: 18px; }
@@ -758,6 +778,22 @@
   .community .pcard { --card-w: clamp(44px, 13vw, 64px); }
   .your-hand .pcard { --card-w: clamp(58px, 17vw, 80px); }
   .score-row { grid-template-columns: 32px 1fr auto; }
+}
+
+/* Short screens, or tall text: the cards give up size before anything gets
+   pushed off the table. */
+@media (max-height: 820px) {
+  .spooky-felt { gap: var(--s2); padding: var(--s2) var(--s3); }
+  .community .pcard { --card-w: clamp(40px, 6vw, 68px); }
+  .community { padding: var(--s2) 0; }
+  .your-hand .pcard { --card-w: clamp(56px, 7vw, 78px); }
+  .pot-pile .candy-stack { --sz: 1.1; }
+}
+@media (max-height: 680px) {
+  .community .pcard { --card-w: clamp(36px, 5vw, 54px); }
+  .your-hand .pcard { --card-w: clamp(50px, 6vw, 66px); }
+  .crypt-cards .pcard { --card-w: 30px; }
+  .pot-pile .candy-stack { display: none; }
 }
 
 @media (max-width: 460px) {

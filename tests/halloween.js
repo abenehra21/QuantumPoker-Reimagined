@@ -965,6 +965,26 @@ export function run(ok, near, section) {
       return m.isPartyMode && m.humanNames.length === 3 && m.players.filter((p) => !p.monster).length === 3;
     })());
 
+    ok('in party mode every human gets their own turn', (() => {
+      // The bug this guards: the table used to keep showing the first
+      // player's hand when the turn passed to the second, which both
+      // exposed a face-down card and deadlocked, because only the player
+      // being displayed was allowed to act.
+      const m = new Match({ seed: 'turns', length: 'quick', humans: ['Ada', 'Bo'], opponents: 2 });
+      const g = m.game;
+      const seen = new Set();
+      let guard = 0;
+      while (g.phase === 'betting' && guard++ < 200) {
+        const p = g.current();
+        if (!p) break;
+        if (p.monster) { step(g); continue; }
+        seen.add(p.seat);
+        g.call();
+      }
+      const humans = g.humans().map((p) => p.seat);
+      return humans.every((s) => seen.has(s));
+    })());
+
     ok('the table never exceeds six seats', (() => {
       const m = new Match({ seed: 'full', humans: ['A', 'B', 'C', 'D', 'E'], opponents: 5 });
       return m.players.length <= 6;
