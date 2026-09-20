@@ -54,6 +54,34 @@ const SETTLE = `
   };
 `;
 
+/** Helpers for driving the Trick or Treat table the way a player does. */
+const SPOOKY = `
+  const rest = (ms) => new Promise(r => setTimeout(r, ms));
+  const click = (sel) => { const b = document.querySelector(sel); if (b && !b.disabled) { b.click(); return true; } return false; };
+  const toRound = async (want) => {
+    for (let i = 0; i < 300; i++) {
+      await rest(90);
+      const g = QP.spooky && QP.spooky.game; if (!g) continue;
+      const pass = document.querySelector('.pass-screen button'); if (pass) { pass.click(); continue; }
+      if (g.round >= want || g.phase === 'over') return;
+      if (g.actor === 0) click('.btn-call');
+    }
+  };
+  const toHand = async (want) => {
+    const b = await import('/src/halloween/brain.js');
+    while (QP.spooky.game.handNo < want) {
+      const g = QP.spooky.game; let k = 0;
+      while (g.phase !== 'over' && k++ < 300) {
+        if (g.phase !== 'betting') break;
+        if (g.actor === 0) g.call(); else b.step(g);
+      }
+      QP.spooky.advance();
+    }
+    QP.router.go('spooky', { match: QP.spooky, force: true });
+    await rest(1300);
+  };
+`;
+
 const SHOTS = [
   { name: 'menu', url: '/index.html', wait: 2600 },
   { name: 'modes', url: '/index.html', wait: 1400,
@@ -90,6 +118,44 @@ const SHOTS = [
     script: `QP.router.go('tutorial'); await new Promise(r=>setTimeout(r,1600));` },
   { name: 'credits', url: '/index.html', wait: 1400,
     script: `QP.router.go('credits'); await new Promise(r=>setTimeout(r,1200));` },
+  /* --- Quantum Trick or Treat --- */
+  { name: 'spooky-intro', url: '/index.html', wait: 1600,
+    script: `QP.router.go('spooky-intro'); await new Promise(r=>setTimeout(r,1600));` },
+  { name: 'spooky-table', url: '/index.html?mode=spooky&seed=partynight&length=quick&bots=3', wait: 2600,
+    script: `${SPOOKY} await toRound(2); await rest(1600);` },
+  { name: 'spooky-haunt', url: '/index.html?mode=spooky&seed=witchhour&length=quick&bots=3', wait: 2400,
+    script: `${SPOOKY}
+      await toHand(5);
+      await toRound(1);
+      const t = QP.table || null;
+      const haunt = [...document.querySelectorAll('.power-btn')].find(b => b.querySelector('.name').textContent === 'Haunt');
+      if (haunt && !haunt.disabled) {
+        haunt.click(); await rest(400);
+        const card = document.querySelector('.your-hand .pcard.pickable');
+        if (card) card.click();
+      }
+      await rest(1400);` },
+  { name: 'spooky-showdown', url: '/index.html?mode=spooky&seed=showdown7&length=quick&bots=3', wait: 2400,
+    script: `${SPOOKY}
+      for (let i = 0; i < 200; i++) {
+        await rest(90);
+        const g = QP.spooky.game; if (g.phase === 'over') break;
+        if (g.actor === 0) click('.btn-call');
+      }
+      await rest(2200);` },
+  { name: 'spooky-scoreboard', url: '/index.html?mode=spooky&seed=partynight&length=quick&bots=3', wait: 2200,
+    script: `${SPOOKY}
+      for (let i = 0; i < 900; i++) {
+        await rest(70);
+        if (QP.router.current.name !== 'spooky') break;
+        const g = QP.spooky && QP.spooky.game; if (!g) continue;
+        const pass = document.querySelector('.pass-screen button'); if (pass) { pass.click(); continue; }
+        if (g.phase === 'over') { click('.bet-controls .btn-primary'); continue; }
+        if (g.actor !== 0) continue;
+        if (!click('.btn-call')) click('.btn-fold');
+      }
+      await rest(1600);` },
+
   { name: 'stats', url: '/index.html', wait: 1400,
     script: `
       const p = QP.profile;

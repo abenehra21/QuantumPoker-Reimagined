@@ -9,6 +9,17 @@ matrices applied to them. Every probability on the table is the honest quantum a
 
 ![The main menu](docs/menu.jpg)
 
+> ### 🎃 New: Quantum Trick or Treat
+> A second mode built for a game night. **Real Texas Hold'em, played for candy,
+> with a light quantum twist** — one of your two cards is face up, and now and
+> then a card becomes a `?` that is genuinely two cards at once until somebody
+> looks. Understandable in ninety seconds, five to fifteen minutes a match,
+> nobody eliminated.
+>
+> Press **H** from the menu, or read **[HALLOWEEN_MODE.md](HALLOWEEN_MODE.md)**.
+>
+> ![Quantum Trick or Treat](docs/spooky-table.jpg)
+
 ---
 
 ## Play it
@@ -24,8 +35,8 @@ and nothing to install. (`tools/serve.py` is just `http.server` with caching tur
 which matters while you are editing.)
 
 ```bash
-npm test          # 178 self-checks, in Node
-npm run check     # module, layering, CSS and asset checks
+npm test          # 318 self-checks, in Node
+npm run check     # module, layering, unused-import, CSS and asset checks
 ```
 
 Or open `index.html?test` and read the console.
@@ -196,6 +207,76 @@ Everything is stored in your own browser and nowhere else; there is no account a
 
 ---
 
+## 🎃 Quantum Trick or Treat
+
+The main game asks you to learn what a qubit is before you can play. This one
+does not. It is Texas Hold'em, the poker your friends already know, with candy
+instead of chips and a few things that should not be possible.
+
+![The front door](docs/spooky-intro.jpg)
+
+**The one new rule:** each player has one hole card **face up** and one face
+down. It takes a sentence to explain, Stud has worked that way for a century,
+and it turns a table of strangers into a table of people reading each other.
+
+**Candy** is the currency — four denominations that stack visibly, fly into the
+pot when you bet and explode when you win. It is entirely fictional; there is
+no money in this game and no way to put any in.
+
+### Four powers, four sentences
+
+Three charges a hand, arriving one at a time over the first five hands. Ignore
+all of them and you are playing ordinary poker — and you can still win, which
+is the balance line the mode is built on.
+
+| | Power | What it says |
+|---|---|---|
+| 👁 | **Measure** | Reveal a mystery card right now. |
+| 🔀 | **Swap** | Trade one of your cards for a new one. |
+| 👻 | **Haunt** | Your card becomes two possibilities at once. |
+| 🎭 | **Spectral Bluff** | Your face-up card turns into a `?` for everyone else. |
+
+![A haunted card](docs/spooky-haunt.jpg)
+
+No gate names. No matrices. No vocabulary. Each one carries a *what is this
+really?* link that is the only place the physics is named, and nobody has to
+click it.
+
+### It is still real quantum underneath
+
+A mystery card is an actual qubit on the same state-vector simulator as the
+main game, and an entangled pair is an actual Bell pair — measure one and the
+other decides in the same instant, verified over 1,600 deals in both the
+"they match" and "they are opposite" flavours. The opponents' equity sampler
+rolls those superpositions per trial rather than ignoring them, so a monster
+facing a `?` is reasoning about it honestly instead of peeking.
+
+### Six monsters with readable tells
+
+Jack the Pumpkin tells you when he has it. The Werewolf bets big and then
+bigger. Schrödinger's Cat has no tell at all, on purpose. They estimate equity
+by dealing the board out a few hundred times, then apply their own
+personality: facing a big bet, Jack folds about three quarters of the time and
+the Werewolf a fifth — a difference you can notice within a few hands.
+
+![Showdown](docs/spooky-showdown.jpg)
+
+### Built for a room full of people
+
+- **Five to fifteen minutes** a match, three lengths.
+- **Nobody is eliminated.** Run out and you are handed a Trick or Treat refill.
+- **Party mode** passes one keyboard between several people, with a cover
+  screen between turns that is skipped when there is nothing left to hide.
+- **Everybody gets a title** at the end: Candy Hoarder, Biggest Bluffer,
+  Quantum Menace, Back From The Dead, The Quiet One.
+- **Share the night** and whoever you send it to gets the same cards.
+
+![The end of the night](docs/spooky-scoreboard.jpg)
+
+Full rules: **[HALLOWEEN_MODE.md](HALLOWEEN_MODE.md)**.
+
+---
+
 ## Controls
 
 | Key | Does |
@@ -237,6 +318,10 @@ QuantumPoker-Reimagined/
 ├── index.html              the only page
 ├── src/
 │   ├── quantum/            state.js  read.js  noise.js  circuit.js
+│   ├── halloween/          the Trick or Treat mode, self-contained
+│   │                       deck.js  evaluate.js  spooky.js  candy.js
+│   │                       powers.js  monsters.js  brain.js  game.js
+│   │                       match.js  awards.js  sounds.js  ui/
 │   ├── gameplay/           cards.js  planner.js  game.js  run.js  relics.js
 │   │                       status.js  modes.js  bosses.js  shop.js
 │   ├── ai/                 personalities.js  brain.js  dialogue.js
@@ -252,7 +337,9 @@ QuantumPoker-Reimagined/
 │   │                       codex stats settings results inspector
 │   └── utils/              rng.js
 ├── styles/                 tokens.css  base.css  components.css  screens.css
-├── tests/run.js            178 self-checks
+├── tests/
+│   ├── run.js              the self-checks
+│   └── halloween.js        …and the Trick or Treat half of them
 ├── tools/                  serve.py  check.js  shots.js
 │                           dump_states.js  verify_with_qiskit.py
 └── assets/                 empty on purpose — see assets/README.md
@@ -260,12 +347,18 @@ QuantumPoker-Reimagined/
 
 One rule holds the whole thing together, and `npm run check` enforces it:
 
-> **`quantum/`, `gameplay/`, `ai/`, `save/`, `tutorial/` and `utils/` may not import from
-> `ui/`, `render/`, `effects/` or `audio/`, and may not touch the DOM.**
+> **`quantum/`, `gameplay/`, `ai/`, `save/`, `tutorial/`, `utils/` and
+> `halloween/` may not import from `ui/`, `render/`, `effects/` or `audio/`,
+> and may not touch the DOM.**
+>
+> (`halloween/ui/` and `halloween/sounds.js` are the two documented
+> exceptions: the mode keeps its own presentation inside its own module
+> rather than scattering Halloween code through `src/ui`.)
 
 That is why the entire game runs headless in Node. The test suite plays twenty-five complete
-games against the bots and checks that not one chip goes missing, and forty simulated runs
-finish in under two seconds — neither would be possible if the rules knew about the screen.
+games against the bots and checks that not one chip goes missing, evaluates twenty thousand
+seven-card poker hands, and finishes forty simulated runs in under two seconds — none of
+which would be possible if the rules knew about the screen.
 
 A few decisions worth naming:
 
